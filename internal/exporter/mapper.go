@@ -44,20 +44,18 @@ func (p metricMapper) Map(metricFamilyMaps []MetricFamiliyMap, ts time.Time) *pb
 						Value: *l.Value,
 					})
 				}
+				var newValue float64
 				switch t {
 				case "COUNTER":
-					metric.Measurements = append(metric.Measurements, &pb.Metric_Measurement{
-						Value:  *m.GetCounter().Value,
-						Ts:     timestamppb.New(ts),
-						Labels: labels,
-					})
+					newValue = *m.GetCounter().Value
 				case "GAUGE":
-					metric.Measurements = append(metric.Measurements, &pb.Metric_Measurement{
-						Value:  *m.GetGauge().Value,
+					newValue = *m.GetGauge().Value,
+				}
+				metric.Measurements = append(metric.Measurements, newMeasurement = &pb.Metric_Measurement{
+						Value:  newValue,
 						Ts:     timestamppb.New(ts),
 						Labels: labels,
 					})
-				}
 			}
 		}
 	}
