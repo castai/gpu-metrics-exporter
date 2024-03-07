@@ -1,0 +1,87 @@
+linters-settings:
+  golint:
+    min-confidence: 0
+  gomnd:
+    settings:
+      mnd:
+        # don't include the "operation" and "assign"
+        checks: [argument,case,condition,return]
+  govet:
+    # shadow is marked as experimental feature, skip it for now.
+    check-shadowing: false
+    settings:
+      printf:
+        funcs:
+          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Infof
+          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Warnf
+          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Errorf
+          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
+  lll:
+    line-length: 200
+  maligned:
+    suggest-new: true
+  misspell:
+    locale: US
+  revive:
+    rules:
+      - name: redefines-builtin-id
+        disabled: true
+      - name: nested-structs
+        disabled: true
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(github.com/castai)
+linters:
+  disable-all: true
+  enable:
+    - dogsled
+    - errcheck
+    - gofmt
+    - revive
+    - goprintffuncname
+    - gosimple
+    - gosec
+    - govet
+    - ineffassign
+    - lll
+    - misspell
+    - nakedret
+    - exportloopref
+    - staticcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unused
+    - whitespace
+    - errname
+    - dupword
+    - gci
+    - containedctx
+    - durationcheck
+    - errorlint
+issues:
+  # Excluding configuration per-path, per-linter, per-text and per-source
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gomnd
+        - bodyclose
+        - gosec
+    - linters:
+        - gosec
+      # Ignored gosec G107 rule because of many false positives. It states that `http.Get(url)` must not contain a variable.
+      text: G107
+    - linters:
+        - unparam
+      # ignoring error where function always receives same value - mostly in tests
+      text: "always receives"
+    - linters:
+        - revive
+      # tolerate code where errors are returned as if-return
+      text: "redundant if ...; err != nil check, just return error instead."
+run:
+  skip-dirs:
+    - gen
+    - e2e
