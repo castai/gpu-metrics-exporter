@@ -1,0 +1,9 @@
+with-expecter: true
+dir: 'mock/{{replace .InterfaceDirRelative "internal" "" 1}}'
+packages:
+  "github.com/castai/gpu-metrics-exporter/internal/exporter":
+    interfaces:
+      Exporter:
+      Scraper:
+      MetricMapper:
+      HttpClient:
