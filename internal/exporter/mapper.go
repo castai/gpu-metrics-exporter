@@ -9,7 +9,7 @@ import (
 )
 
 type MetricMapper interface {
-	Map(metrics []MetricFamiliyMap, ts time.Time) *pb.MetricsBatch
+	Map(metrics []MetricFamilyMap, ts time.Time) *pb.MetricsBatch
 }
 
 type metricMapper struct{}
@@ -18,7 +18,7 @@ func NewMapper() MetricMapper {
 	return &metricMapper{}
 }
 
-func (p metricMapper) Map(metricFamilyMaps []MetricFamiliyMap, ts time.Time) *pb.MetricsBatch {
+func (p metricMapper) Map(metricFamilyMaps []MetricFamilyMap, ts time.Time) *pb.MetricsBatch {
 	metrics := &pb.MetricsBatch{}
 	metricsMap := make(map[string]*pb.Metric)
 	for _, familyMap := range metricFamilyMaps {
@@ -49,13 +49,14 @@ func (p metricMapper) Map(metricFamilyMaps []MetricFamiliyMap, ts time.Time) *pb
 				case "COUNTER":
 					newValue = *m.GetCounter().Value
 				case "GAUGE":
-					newValue = *m.GetGauge().Value,
+					newValue = *m.GetGauge().Value
 				}
-				metric.Measurements = append(metric.Measurements, newMeasurement = &pb.Metric_Measurement{
-						Value:  newValue,
-						Ts:     timestamppb.New(ts),
-						Labels: labels,
-					})
+
+				metric.Measurements = append(metric.Measurements, &pb.Metric_Measurement{
+					Value:  newValue,
+					Ts:     timestamppb.New(ts),
+					Labels: labels,
+				})
 			}
 		}
 	}

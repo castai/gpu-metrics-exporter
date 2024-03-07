@@ -23,23 +23,23 @@ func (_m *MockScraper) EXPECT() *MockScraper_Expecter {
 }
 
 // Scrape provides a mock function with given fields: ctx, urls
-func (_m *MockScraper) Scrape(ctx context.Context, urls []string) ([]exporter.MetricFamiliyMap, error) {
+func (_m *MockScraper) Scrape(ctx context.Context, urls []string) ([]exporter.MetricFamilyMap, error) {
 	ret := _m.Called(ctx, urls)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Scrape")
 	}
 
-	var r0 []exporter.MetricFamiliyMap
+	var r0 []exporter.MetricFamilyMap
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, []string) ([]exporter.MetricFamiliyMap, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, []string) ([]exporter.MetricFamilyMap, error)); ok {
 		return rf(ctx, urls)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, []string) []exporter.MetricFamiliyMap); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, []string) []exporter.MetricFamilyMap); ok {
 		r0 = rf(ctx, urls)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]exporter.MetricFamiliyMap)
+			r0 = ret.Get(0).([]exporter.MetricFamilyMap)
 		}
 	}
 
@@ -71,12 +71,12 @@ func (_c *MockScraper_Scrape_Call) Run(run func(ctx context.Context, urls []stri
 	return _c
 }
 
-func (_c *MockScraper_Scrape_Call) Return(_a0 []exporter.MetricFamiliyMap, _a1 error) *MockScraper_Scrape_Call {
+func (_c *MockScraper_Scrape_Call) Return(_a0 []exporter.MetricFamilyMap, _a1 error) *MockScraper_Scrape_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockScraper_Scrape_Call) RunAndReturn(run func(context.Context, []string) ([]exporter.MetricFamiliyMap, error)) *MockScraper_Scrape_Call {
+func (_c *MockScraper_Scrape_Call) RunAndReturn(run func(context.Context, []string) ([]exporter.MetricFamilyMap, error)) *MockScraper_Scrape_Call {
 	_c.Call.Return(run)
 	return _c
 }

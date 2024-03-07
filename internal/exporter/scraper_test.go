@@ -28,7 +28,7 @@ func TestScraper_Scrape(t *testing.T) {
 	log := logrus.New()
 
 	t.Run("scrapes metrics without error", func(t *testing.T) {
-		httpClient := mocks.NewMockHttpClient(t)
+		httpClient := mocks.NewMockHTTPClient(t)
 		scraper := exporter.NewScraper(httpClient, log)
 
 		response1 := &http.Response{
@@ -76,7 +76,7 @@ func TestScraper_Scrape(t *testing.T) {
 	})
 
 	t.Run("partially scrapes metrics when some exporter returns non-200 code", func(t *testing.T) {
-		httpClient := mocks.NewMockHttpClient(t)
+		httpClient := mocks.NewMockHTTPClient(t)
 		scraper := exporter.NewScraper(httpClient, log)
 
 		response := &http.Response{
@@ -123,7 +123,7 @@ func TestScraper_Scrape(t *testing.T) {
 	})
 
 	t.Run("partially scrapes metrics when some exporter cannot be scraped", func(t *testing.T) {
-		httpClient := mocks.NewMockHttpClient(t)
+		httpClient := mocks.NewMockHTTPClient(t)
 		scraper := exporter.NewScraper(httpClient, log)
 
 		response := &http.Response{

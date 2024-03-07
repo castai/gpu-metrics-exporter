@@ -48,7 +48,7 @@ func TestExporter_Running(t *testing.T) {
 	ex := exporter.NewExporter(config, kubeClient, log, scraper, mapper)
 	ex.Enable()
 
-	metricFamilies := []exporter.MetricFamiliyMap{
+	metricFamilies := []exporter.MetricFamilyMap{
 		{
 			"test_gauge": {
 				Type: dto.MetricType_GAUGE.Enum(),

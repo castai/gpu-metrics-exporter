@@ -30,7 +30,7 @@ func TestMetricMapper_Map(t *testing.T) {
 
 	t.Run("empty input yields empty MetricsBatch", func(t *testing.T) {
 		ts := time.Now()
-		metricFamilyMaps := []exporter.MetricFamiliyMap{}
+		metricFamilyMaps := []exporter.MetricFamilyMap{}
 
 		got := mapper.Map(metricFamilyMaps, ts)
 		expected := &pb.MetricsBatch{}
@@ -41,7 +41,7 @@ func TestMetricMapper_Map(t *testing.T) {
 
 	t.Run("metric familiy which is not enabled is skipped", func(t *testing.T) {
 		ts := time.Now()
-		metricFamilyMaps := []exporter.MetricFamiliyMap{
+		metricFamilyMaps := []exporter.MetricFamilyMap{
 			{
 				"test_gauge": {
 					Type: dto.MetricType_GAUGE.Enum(),
@@ -66,7 +66,7 @@ func TestMetricMapper_Map(t *testing.T) {
 
 	t.Run("enabled metric family is included", func(t *testing.T) {
 		ts := time.Now()
-		metricFamilyMaps := []exporter.MetricFamiliyMap{
+		metricFamilyMaps := []exporter.MetricFamilyMap{
 			{
 				"test_gauge": {
 					Type: dto.MetricType_GAUGE.Enum(),

@@ -20,7 +20,7 @@ const (
 type MetricFamilyMap map[string]*dto.MetricFamily
 
 type Scraper interface {
-	Scrape(ctx context.Context, urls []string) ([]MetricFamiliyMap, error)
+	Scrape(ctx context.Context, urls []string) ([]MetricFamilyMap, error)
 }
 
 type HTTPClient interface {
@@ -28,7 +28,7 @@ type HTTPClient interface {
 }
 
 type result struct {
-	metricFamilyMap MetricFamiliyMap
+	metricFamilyMap MetricFamilyMap
 	err             error
 	ts              time.Time
 }
@@ -46,7 +46,7 @@ func NewScraper(httpClient HTTPClient, log logrus.FieldLogger) Scraper {
 	}
 }
 
-func (s scraper) Scrape(ctx context.Context, urls []string) ([]MetricFamiliyMap, error) {
+func (s scraper) Scrape(ctx context.Context, urls []string) ([]MetricFamilyMap, error) {
 	var g errgroup.Group
 	g.SetLimit(maxConcurrentScrapes)
 
@@ -78,7 +78,7 @@ func (s scraper) Scrape(ctx context.Context, urls []string) ([]MetricFamiliyMap,
 		close(resultsChan)
 	}()
 
-	metrics := make([]MetricFamiliyMap, 0, len(urls))
+	metrics := make([]MetricFamilyMap, 0, len(urls))
 	for result := range resultsChan {
 		if result.err != nil {
 			s.log.Error(result.err)
