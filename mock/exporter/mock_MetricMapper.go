@@ -25,7 +25,7 @@ func (_m *MockMetricMapper) EXPECT() *MockMetricMapper_Expecter {
 }
 
 // Map provides a mock function with given fields: metrics, ts
-func (_m *MockMetricMapper) Map(metrics []exporter.MetricFamiliyMap, ts time.Time) *pb.MetricsBatch {
+func (_m *MockMetricMapper) Map(metrics []exporter.MetricFamilyMap, ts time.Time) *pb.MetricsBatch {
 	ret := _m.Called(metrics, ts)
 
 	if len(ret) == 0 {
@@ -33,7 +33,7 @@ func (_m *MockMetricMapper) Map(metrics []exporter.MetricFamiliyMap, ts time.Tim
 	}
 
 	var r0 *pb.MetricsBatch
-	if rf, ok := ret.Get(0).(func([]exporter.MetricFamiliyMap, time.Time) *pb.MetricsBatch); ok {
+	if rf, ok := ret.Get(0).(func([]exporter.MetricFamilyMap, time.Time) *pb.MetricsBatch); ok {
 		r0 = rf(metrics, ts)
 	} else {
 		if ret.Get(0) != nil {
@@ -50,15 +50,15 @@ type MockMetricMapper_Map_Call struct {
 }
 
 // Map is a helper method to define mock.On call
-//   - metrics []exporter.MetricFamiliyMap
+//   - metrics []exporter.MetricFamilyMap
 //   - ts time.Time
 func (_e *MockMetricMapper_Expecter) Map(metrics interface{}, ts interface{}) *MockMetricMapper_Map_Call {
 	return &MockMetricMapper_Map_Call{Call: _e.mock.On("Map", metrics, ts)}
 }
 
-func (_c *MockMetricMapper_Map_Call) Run(run func(metrics []exporter.MetricFamiliyMap, ts time.Time)) *MockMetricMapper_Map_Call {
+func (_c *MockMetricMapper_Map_Call) Run(run func(metrics []exporter.MetricFamilyMap, ts time.Time)) *MockMetricMapper_Map_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].([]exporter.MetricFamiliyMap), args[1].(time.Time))
+		run(args[0].([]exporter.MetricFamilyMap), args[1].(time.Time))
 	})
 	return _c
 }
@@ -68,7 +68,7 @@ func (_c *MockMetricMapper_Map_Call) Return(_a0 *pb.MetricsBatch) *MockMetricMap
 	return _c
 }
 
-func (_c *MockMetricMapper_Map_Call) RunAndReturn(run func([]exporter.MetricFamiliyMap, time.Time) *pb.MetricsBatch) *MockMetricMapper_Map_Call {
+func (_c *MockMetricMapper_Map_Call) RunAndReturn(run func([]exporter.MetricFamilyMap, time.Time) *pb.MetricsBatch) *MockMetricMapper_Map_Call {
 	_c.Call.Return(run)
 	return _c
 }

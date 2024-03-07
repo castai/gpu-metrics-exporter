@@ -82,14 +82,15 @@ func run(cfg *config.Config, log logrus.FieldLogger) error {
 	ex := exporter.NewExporter(exporter.Config{
 		ExportInterval:   cfg.ExportInterval,
 		Selector:         labelSelector.String(),
-		DCGMExporterPort: 9400,
-		DCGMExporterPath: "/metrics",
+		DCGMExporterPort: cfg.DCGMPort,
+		DCGMExporterPath: cfg.DCGMMetricsEndpoint,
 		Enabled:          true,
 	}, clientset, log, scraper, mapper)
 
 	go func() {
 		if err := ex.Start(ctx); err != nil && !errors.Is(err, context.Canceled) {
 			log.Errorf("exporter stopped with error %v", err)
+			cancel()
 		}
 	}()
 
