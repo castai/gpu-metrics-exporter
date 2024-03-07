@@ -17,7 +17,7 @@ const (
 	maxConcurrentScrapes = 15
 )
 
-type MetricFamiliyMap map[string]*dto.MetricFamily
+type MetricFamilyMap map[string]*dto.MetricFamily
 
 type Scraper interface {
 	Scrape(ctx context.Context, urls []string) ([]MetricFamiliyMap, error)
