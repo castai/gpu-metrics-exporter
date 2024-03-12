@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
@@ -17,6 +18,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/flowcontrol"
 
+	"github.com/castai/gpu-metrics-exporter/internal/castai"
 	"github.com/castai/gpu-metrics-exporter/internal/config"
 	"github.com/castai/gpu-metrics-exporter/internal/exporter"
 	"github.com/castai/gpu-metrics-exporter/internal/server"
@@ -77,6 +79,7 @@ func run(cfg *config.Config, log logrus.FieldLogger) error {
 		log.Fatal(err)
 	}
 
+	client := setupCastAIClient(log, cfg)
 	scraper := exporter.NewScraper(&http.Client{}, log)
 	mapper := exporter.NewMapper()
 	ex := exporter.NewExporter(exporter.Config{
@@ -85,7 +88,7 @@ func run(cfg *config.Config, log logrus.FieldLogger) error {
 		DCGMExporterPort: cfg.DCGMPort,
 		DCGMExporterPath: cfg.DCGMMetricsEndpoint,
 		Enabled:          true,
-	}, clientset, log, scraper, mapper)
+	}, clientset, log, scraper, mapper, client)
 
 	go func() {
 		if err := ex.Start(ctx); err != nil && !errors.Is(err, context.Canceled) {
@@ -125,4 +128,21 @@ func selectorFromMap(labelMap map[string]string) (labels.Selector, error) {
 	}
 
 	return selector.Add(requirements...), nil
+}
+
+func setupCastAIClient(log logrus.FieldLogger, cfg *config.Config) castai.Client {
+	clientConfig := castai.Config{
+		ClusterID: cfg.ClusterID,
+		APIKey:    cfg.APIKey,
+		URL:       cfg.CastAPI,
+	}
+	restyClient := resty.NewWithClient(&http.Client{
+		Timeout: 2 * time.Minute,
+		Transport: &http.Transport{
+			Proxy:             http.ProxyFromEnvironment,
+			ForceAttemptHTTP2: true,
+		},
+	})
+
+	return castai.NewClient(clientConfig, log, restyClient)
 }

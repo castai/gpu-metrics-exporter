@@ -7,3 +7,6 @@ packages:
       Scraper:
       MetricMapper:
       HttpClient:
+  "github.com/castai/gpu-metrics-exporter/internal/castai":
+    interfaces:
+      Client:

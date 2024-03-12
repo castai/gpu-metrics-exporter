@@ -3,6 +3,8 @@ module github.com/castai/gpu-metrics-exporter
 go 1.22.0
 
 require (
+	github.com/go-resty/resty/v2 v2.11.0
+	github.com/jarcoal/httpmock v1.3.1
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/prometheus/client_model v0.6.0
 	github.com/prometheus/common v0.49.0
