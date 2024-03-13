@@ -21,7 +21,7 @@ func Test_UploadBatch(t *testing.T) {
 		URL:       "http://localhost",
 		APIKey:    "my-fake-token",
 		ClusterID: "cluster-id-1",
-	}, log, restyClient)
+	}, log, restyClient, "test")
 
 	httpmock.ActivateNonDefault(restyClient.GetClient())
 	t.Run("calls gpu-metrics endpoint with proper headers", func(t *testing.T) {
@@ -39,6 +39,9 @@ func Test_UploadBatch(t *testing.T) {
 
 				apiKey := req.Header.Get("X-API-Key")
 				r.Equal("my-fake-token", apiKey)
+
+				userAgent := req.Header.Get("User-Agent")
+				r.Equal("castai-gpu-metrics-exporter/test", userAgent)
 
 				return &http.Response{StatusCode: 200}, nil
 			},

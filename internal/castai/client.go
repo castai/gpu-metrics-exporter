@@ -34,6 +34,9 @@ var (
 
 	contentEncodingHeader = http.CanonicalHeaderKey("Content-Encoding")
 	contentEncoding       = "gzip"
+
+	userAgentHeader = http.CanonicalHeaderKey("User-Agent")
+	userAgent       = "castai-gpu-metrics-exporter/"
 )
 
 type Config struct {
@@ -52,12 +55,13 @@ type client struct {
 	log         logrus.FieldLogger
 }
 
-func NewClient(cfg Config, log logrus.FieldLogger, restyClient *resty.Client) Client {
+func NewClient(cfg Config, log logrus.FieldLogger, restyClient *resty.Client, version string) Client {
 	restyClient.BaseURL = cfg.URL
 	restyClient.SetHeaders(map[string]string{
 		tokenHeader:           cfg.APIKey,
 		contentTypeHeader:     contentType,
 		contentEncodingHeader: contentEncoding,
+		userAgentHeader:       fmt.Sprintf("%s%s", userAgent, version),
 	})
 
 	return &client{
