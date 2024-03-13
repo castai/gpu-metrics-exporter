@@ -24,6 +24,12 @@ import (
 	"github.com/castai/gpu-metrics-exporter/internal/server"
 )
 
+var (
+	GitCommit = "undefined"
+	GitRef    = "no-ref"
+	Version   = "local"
+)
+
 func main() {
 	log := logrus.New()
 
@@ -144,5 +150,5 @@ func setupCastAIClient(log logrus.FieldLogger, cfg *config.Config) castai.Client
 		},
 	})
 
-	return castai.NewClient(clientConfig, log, restyClient)
+	return castai.NewClient(clientConfig, log, restyClient, Version)
 }
