@@ -15,7 +15,9 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 
 	"github.com/castai/gpu-metrics-exporter/internal/exporter"
+	castai_mock "github.com/castai/gpu-metrics-exporter/mock/castai"
 	mocks "github.com/castai/gpu-metrics-exporter/mock/exporter"
+	"github.com/castai/gpu-metrics-exporter/pb"
 )
 
 func TestExporter_Running(t *testing.T) {
@@ -44,8 +46,9 @@ func TestExporter_Running(t *testing.T) {
 
 	scraper := mocks.NewMockScraper(t)
 	mapper := mocks.NewMockMetricMapper(t)
+	client := castai_mock.NewMockClient(t)
 
-	ex := exporter.NewExporter(config, kubeClient, log, scraper, mapper)
+	ex := exporter.NewExporter(config, kubeClient, log, scraper, mapper, client)
 	ex.Enable()
 
 	metricFamilies := []exporter.MetricFamilyMap{
@@ -75,8 +78,11 @@ func TestExporter_Running(t *testing.T) {
 		},
 	}
 
+	batch := &pb.MetricsBatch{}
+
 	scraper.EXPECT().Scrape(ctx, []string{"http://192.168.1.1:9400/metrics"}).Times(1).Return(metricFamilies, nil)
-	mapper.EXPECT().Map(metricFamilies, mock.Anything).Times(1).Return(nil, nil)
+	mapper.EXPECT().Map(metricFamilies, mock.Anything).Times(1).Return(batch, nil)
+	client.EXPECT().UploadBatch(mock.Anything, batch).Times(1).Return(nil, nil)
 
 	go func() {
 		err := ex.Start(ctx)

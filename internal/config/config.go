@@ -16,6 +16,8 @@ type Config struct {
 	ExportInterval      time.Duration     `envconfig:"EXPORT_INTERVAL" default:"15s"`
 	CastAPI             string            `envconfig:"CAST_API" default:"https://api.cast.ai"`
 	APIToken            string            `envconfig:"API_TOKEN"`
+	ClusterID           string            `envconfig:"CLUSTER_ID"`
+	APIKey              string            `envconfig:"API_KEY"`
 }
 
 func GetFromEnvironment() (*Config, error) {

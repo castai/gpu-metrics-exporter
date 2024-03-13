@@ -9,10 +9,8 @@ import (
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-)
 
-const (
-	cleanupInterval = 3 * time.Minute
+	"github.com/castai/gpu-metrics-exporter/internal/castai"
 )
 
 type Exporter interface {
@@ -37,9 +35,17 @@ type exporter struct {
 	scraper Scraper
 	mapper  MetricMapper
 	enabled *atomic.Bool
+	client  castai.Client
 }
 
-func NewExporter(cfg Config, kube kubernetes.Interface, log logrus.FieldLogger, scraper Scraper, mapper MetricMapper) Exporter {
+func NewExporter(
+	cfg Config,
+	kube kubernetes.Interface,
+	log logrus.FieldLogger,
+	scraper Scraper,
+	mapper MetricMapper,
+	castaiClient castai.Client,
+) Exporter {
 	enabled := atomic.Bool{}
 	enabled.Store(cfg.Enabled)
 
@@ -50,15 +56,13 @@ func NewExporter(cfg Config, kube kubernetes.Interface, log logrus.FieldLogger, 
 		scraper: scraper,
 		mapper:  mapper,
 		enabled: &enabled,
+		client:  castaiClient,
 	}
 }
 
 func (e *exporter) Start(ctx context.Context) error {
 	exportTicker := time.NewTicker(e.cfg.ExportInterval)
 	defer exportTicker.Stop()
-
-	cleanupTicker := time.NewTicker(cleanupInterval)
-	defer cleanupTicker.Stop()
 
 	for {
 		select {
@@ -68,11 +72,9 @@ func (e *exporter) Start(ctx context.Context) error {
 			if !e.enabled.Load() {
 				continue
 			}
-			if err := e.collect(ctx); err != nil {
-				e.log.Errorf("collect error: %v", err)
+			if err := e.export(ctx); err != nil {
+				e.log.Errorf("export error: %v", err)
 			}
-		case <-cleanupTicker.C:
-			// TODO: call cleanup procedure
 		}
 	}
 }
@@ -89,7 +91,7 @@ func (e *exporter) Enabled() bool {
 	return e.enabled.Load()
 }
 
-func (e *exporter) collect(ctx context.Context) error {
+func (e *exporter) export(ctx context.Context) error {
 	// TODO: consider using an informer and keeping a list of pods which match the selector
 	// at the moment seems like an overkill
 	dcgmExporterList, err := e.kube.CoreV1().Pods("").List(ctx, metav1.ListOptions{
@@ -110,8 +112,13 @@ func (e *exporter) collect(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("couldn't scrape DCGM exporters %w", err)
 	}
-	metrics := e.mapper.Map(metricFamilies, time.Now())
-	_ = metrics
+
+	batch := e.mapper.Map(metricFamilies, time.Now())
+	if err := e.client.UploadBatch(ctx, batch); err != nil {
+		return fmt.Errorf("error whlie sending metrics %d to castai %w", len(batch.Metrics), err)
+	}
+
+	e.log.Infof("successfully exported %d metrics", len(batch.Metrics))
 
 	return nil
 }
