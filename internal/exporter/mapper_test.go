@@ -6,7 +6,6 @@ import (
 
 	dto "github.com/prometheus/client_model/go"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/castai/gpu-metrics-exporter/internal/exporter"
 	"github.com/castai/gpu-metrics-exporter/pb"
@@ -101,9 +100,8 @@ func TestMetricMapper_Map(t *testing.T) {
 					Measurements: []*pb.Metric_Measurement{
 						{
 							Value: 1.0,
-							Ts:    timestamppb.New(ts),
-							Labels: []*pb.Metric_Label{
-								{Name: "label1", Value: "value1"},
+							Labels: map[string]string{
+								"label1": "value1",
 							},
 						},
 					},
