@@ -3,8 +3,6 @@ package exporter
 import (
 	"time"
 
-	"google.golang.org/protobuf/types/known/timestamppb"
-
 	"github.com/castai/gpu-metrics-exporter/pb"
 )
 
@@ -37,12 +35,9 @@ func (p metricMapper) Map(metricFamilyMaps []MetricFamilyMap, ts time.Time) *pb.
 			}
 			t := family.Type.String()
 			for _, m := range family.Metric {
-				labels := []*pb.Metric_Label{}
+				labels := make(map[string]string)
 				for _, l := range m.Label {
-					labels = append(labels, &pb.Metric_Label{
-						Name:  *l.Name,
-						Value: *l.Value,
-					})
+					labels[*l.Name] = *l.Value
 				}
 				var newValue float64
 				switch t {
@@ -54,7 +49,6 @@ func (p metricMapper) Map(metricFamilyMaps []MetricFamilyMap, ts time.Time) *pb.
 
 				metric.Measurements = append(metric.Measurements, &pb.Metric_Measurement{
 					Value:  newValue,
-					Ts:     timestamppb.New(ts),
 					Labels: labels,
 				})
 			}

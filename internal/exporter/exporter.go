@@ -107,15 +107,23 @@ func (e *exporter) export(ctx context.Context) error {
 		dcgmExporter := dcgmExporterList.Items[i]
 		urls[i] = fmt.Sprintf("http://%s:%d%s", dcgmExporter.Status.PodIP, e.cfg.DCGMExporterPort, e.cfg.DCGMExporterPath)
 	}
+	if len(urls) == 0 {
+		e.log.Info("no dcgm-exporter instances to scrape")
+		return nil
+	}
 
 	metricFamilies, err := e.scraper.Scrape(ctx, urls)
 	if err != nil {
 		return fmt.Errorf("couldn't scrape DCGM exporters %w", err)
 	}
+	if len(metricFamilies) == 0 {
+		e.log.Warnf("no metrics collected from %d dcgm-exporters", len(urls))
+		return nil
+	}
 
 	batch := e.mapper.Map(metricFamilies, time.Now())
 	if err := e.client.UploadBatch(ctx, batch); err != nil {
-		return fmt.Errorf("error whlie sending metrics %d to castai %w", len(batch.Metrics), err)
+		return fmt.Errorf("error whlie sending %d metrics to castai %w", len(batch.Metrics), err)
 	}
 
 	e.log.Infof("successfully exported %d metrics", len(batch.Metrics))

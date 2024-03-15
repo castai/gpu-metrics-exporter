@@ -93,9 +93,9 @@ func (c client) UploadBatch(ctx context.Context, batch *pb.MetricsBatch) error {
 		case statusCode >= 200 && statusCode < 300:
 			return true, nil
 		case statusCode >= 400 && statusCode < 500:
-			return true, fmt.Errorf("client error: %d %s", statusCode, resp.Status())
+			return true, fmt.Errorf("status code: %d, status: %s", statusCode, resp.Status())
 		default:
-			c.log.Errorf("server error or unexpected response code: %d %s", statusCode, resp.Status())
+			c.log.Errorf("server error or unexpected status code: %d, status: %s", statusCode, resp.Status())
 			return false, nil
 		}
 	})
