@@ -35,9 +35,12 @@ func (p metricMapper) Map(metricFamilyMaps []MetricFamilyMap, ts time.Time) *pb.
 			}
 			t := family.Type.String()
 			for _, m := range family.Metric {
-				labels := make(map[string]string)
-				for _, l := range m.Label {
-					labels[*l.Name] = *l.Value
+				labels := make([]*pb.Metric_Label, len(m.Label))
+				for i, label := range m.Label {
+					labels[i] = &pb.Metric_Label{
+						Name:  *label.Name,
+						Value: *label.Value,
+					}
 				}
 				var newValue float64
 				switch t {
