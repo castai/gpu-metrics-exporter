@@ -7,9 +7,14 @@ message Metric {
     string name = 1;
     repeated Measurement measurements = 2;
 
+    message Label {
+        string name = 1;
+        string value = 2;
+    }
+
     message Measurement {
         double value = 1;
-        map<string, string> labels = 2;
+        repeated Label labels = 2;
     }
 }
 

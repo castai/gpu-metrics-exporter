@@ -100,8 +100,8 @@ func TestMetricMapper_Map(t *testing.T) {
 					Measurements: []*pb.Metric_Measurement{
 						{
 							Value: 1.0,
-							Labels: map[string]string{
-								"label1": "value1",
+							Labels: []*pb.Metric_Label{
+								{Name: "label1", Value: "value1"},
 							},
 						},
 					},
