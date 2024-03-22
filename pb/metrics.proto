@@ -1,8 +1,7 @@
 syntax = "proto3";
 
-import "google/protobuf/timestamp.proto";
-
 option go_package = "github.com/castai/gpu-metrics-exporter/pb";
+
 
 message Metric {
     string name = 1;
@@ -15,8 +14,7 @@ message Metric {
 
     message Measurement {
         double value = 1;
-        google.protobuf.Timestamp ts = 2;
-        repeated Label labels = 3;
+        repeated Label labels = 2;
     }
 }
 
