@@ -81,7 +81,7 @@ func TestExporter_Running(t *testing.T) {
 	batch := &pb.MetricsBatch{}
 
 	scraper.EXPECT().Scrape(ctx, []string{"http://192.168.1.1:9400/metrics"}).Times(1).Return(metricFamilies, nil)
-	mapper.EXPECT().Map(metricFamilies, mock.Anything).Times(1).Return(batch, nil)
+	mapper.EXPECT().Map(metricFamilies).Times(1).Return(batch, nil)
 	client.EXPECT().UploadBatch(mock.Anything, batch).Times(1).Return(nil, nil)
 
 	go func() {
