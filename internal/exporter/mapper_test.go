@@ -2,7 +2,6 @@ package exporter_test
 
 import (
 	"testing"
-	"time"
 
 	dto "github.com/prometheus/client_model/go"
 	"github.com/stretchr/testify/require"
@@ -28,10 +27,9 @@ func TestMetricMapper_Map(t *testing.T) {
 	mapper := exporter.NewMapper()
 
 	t.Run("empty input yields empty MetricsBatch", func(t *testing.T) {
-		ts := time.Now()
 		metricFamilyMaps := []exporter.MetricFamilyMap{}
 
-		got := mapper.Map(metricFamilyMaps, ts)
+		got := mapper.Map(metricFamilyMaps)
 		expected := &pb.MetricsBatch{}
 
 		r := require.New(t)
@@ -39,7 +37,6 @@ func TestMetricMapper_Map(t *testing.T) {
 	})
 
 	t.Run("metric familiy which is not enabled is skipped", func(t *testing.T) {
-		ts := time.Now()
 		metricFamilyMaps := []exporter.MetricFamilyMap{
 			{
 				"test_gauge": {
@@ -56,7 +53,7 @@ func TestMetricMapper_Map(t *testing.T) {
 			},
 		}
 
-		got := mapper.Map(metricFamilyMaps, ts)
+		got := mapper.Map(metricFamilyMaps)
 		expected := &pb.MetricsBatch{}
 
 		r := require.New(t)
@@ -64,7 +61,6 @@ func TestMetricMapper_Map(t *testing.T) {
 	})
 
 	t.Run("enabled metric family is included", func(t *testing.T) {
-		ts := time.Now()
 		metricFamilyMaps := []exporter.MetricFamilyMap{
 			{
 				"test_gauge": {
@@ -92,7 +88,7 @@ func TestMetricMapper_Map(t *testing.T) {
 			},
 		}
 
-		got := mapper.Map(metricFamilyMaps, ts)
+		got := mapper.Map(metricFamilyMaps)
 		expected := &pb.MetricsBatch{
 			Metrics: []*pb.Metric{
 				{

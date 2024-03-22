@@ -121,7 +121,7 @@ func (e *exporter) export(ctx context.Context) error {
 		return nil
 	}
 
-	batch := e.mapper.Map(metricFamilies, time.Now())
+	batch := e.mapper.Map(metricFamilies)
 	if err := e.client.UploadBatch(ctx, batch); err != nil {
 		return fmt.Errorf("error whlie sending %d metrics to castai %w", len(batch.Metrics), err)
 	}

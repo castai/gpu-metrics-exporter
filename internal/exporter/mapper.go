@@ -1,13 +1,11 @@
 package exporter
 
 import (
-	"time"
-
 	"github.com/castai/gpu-metrics-exporter/pb"
 )
 
 type MetricMapper interface {
-	Map(metrics []MetricFamilyMap, ts time.Time) *pb.MetricsBatch
+	Map(metrics []MetricFamilyMap) *pb.MetricsBatch
 }
 
 type metricMapper struct{}
@@ -16,7 +14,7 @@ func NewMapper() MetricMapper {
 	return &metricMapper{}
 }
 
-func (p metricMapper) Map(metricFamilyMaps []MetricFamilyMap, ts time.Time) *pb.MetricsBatch {
+func (p metricMapper) Map(metricFamilyMaps []MetricFamilyMap) *pb.MetricsBatch {
 	metrics := &pb.MetricsBatch{}
 	metricsMap := make(map[string]*pb.Metric)
 	for _, familyMap := range metricFamilyMaps {
