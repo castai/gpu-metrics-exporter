@@ -24,6 +24,7 @@ type Config struct {
 	ExportInterval   time.Duration
 	DCGMExporterPort int
 	DCGMExporterPath string
+	DCGMExporterHost string
 	Selector         string
 	Enabled          bool
 }
@@ -91,7 +92,14 @@ func (e *exporter) Enabled() bool {
 	return e.enabled.Load()
 }
 
-func (e *exporter) export(ctx context.Context) error {
+func (e *exporter) getDCGMUrls(ctx context.Context) ([]string, error) {
+	if e.cfg.DCGMExporterHost != "" {
+		// we are scraping a single host, no need to check for other pods
+		return []string{
+			fmt.Sprintf("http://%s:%d%s", e.cfg.DCGMExporterHost, e.cfg.DCGMExporterPort, e.cfg.DCGMExporterPath),
+		}, nil
+	}
+
 	// TODO: consider using an informer and keeping a list of pods which match the selector
 	// at the moment seems like an overkill
 	dcgmExporterList, err := e.kube.CoreV1().Pods("").List(ctx, metav1.ListOptions{
@@ -99,7 +107,7 @@ func (e *exporter) export(ctx context.Context) error {
 		FieldSelector: "status.phase=Running",
 	})
 	if err != nil {
-		return fmt.Errorf("error getting DCGM exporter pods %w", err)
+		return []string{}, fmt.Errorf("error getting DCGM exporter pods %w", err)
 	}
 
 	urls := make([]string, len(dcgmExporterList.Items))
@@ -107,6 +115,16 @@ func (e *exporter) export(ctx context.Context) error {
 		dcgmExporter := dcgmExporterList.Items[i]
 		urls[i] = fmt.Sprintf("http://%s:%d%s", dcgmExporter.Status.PodIP, e.cfg.DCGMExporterPort, e.cfg.DCGMExporterPath)
 	}
+
+	return urls, nil
+}
+
+func (e *exporter) export(ctx context.Context) error {
+	urls, err := e.getDCGMUrls(ctx)
+	if err != nil {
+		return err
+	}
+
 	if len(urls) == 0 {
 		e.log.Info("no dcgm-exporter instances to scrape")
 		return nil
