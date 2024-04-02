@@ -93,6 +93,7 @@ func run(cfg *config.Config, log logrus.FieldLogger) error {
 		Selector:         labelSelector.String(),
 		DCGMExporterPort: cfg.DCGMPort,
 		DCGMExporterPath: cfg.DCGMMetricsEndpoint,
+		DCGMExporterHost: cfg.DCGMHost,
 		Enabled:          true,
 	}, clientset, log, scraper, mapper, client)
 

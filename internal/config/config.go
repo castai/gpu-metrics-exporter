@@ -13,6 +13,7 @@ type Config struct {
 	DCGMLabels          map[string]string `envconfig:"DCGM_LABELS" default:"app.kubernetes.io/name:dcgm-exporter"`
 	DCGMPort            int               `envconfig:"DCGM_PORT" default:"9400"`
 	DCGMMetricsEndpoint string            `envconfig:"DCGM_METRICS_ENDPOINT" default:"/metrics"`
+	DCGMHost            string            `envconfig:"DCGM_HOST"`
 	ExportInterval      time.Duration     `envconfig:"EXPORT_INTERVAL" default:"15s"`
 	CastAPI             string            `envconfig:"CAST_API" default:"https://api.cast.ai"`
 	ClusterID           string            `envconfig:"CLUSTER_ID"`

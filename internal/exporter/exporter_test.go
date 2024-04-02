@@ -22,77 +22,148 @@ import (
 
 func TestExporter_Running(t *testing.T) {
 	log := logrus.New()
-	ctx := context.Background()
 
-	kubeClient := fake.NewSimpleClientset(&corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "dcgm-exporter",
-			Namespace: "default",
-			Labels:    map[string]string{"app": "dcgm-exporter"},
-		},
-		Status: corev1.PodStatus{
-			PodIP: "192.168.1.1",
-			Phase: corev1.PodRunning,
-		},
+	t.Run("discovers pods with labels and scrapes them", func(t *testing.T) {
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		kubeClient := fake.NewSimpleClientset(&corev1.Pod{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "dcgm-exporter",
+				Namespace: "default",
+				Labels:    map[string]string{"app": "dcgm-exporter"},
+			},
+			Status: corev1.PodStatus{
+				PodIP: "192.168.1.1",
+				Phase: corev1.PodRunning,
+			},
+		})
+
+		config := exporter.Config{
+			ExportInterval:   2 * time.Second,
+			DCGMExporterPort: 9400,
+			DCGMExporterPath: "/metrics",
+			Selector:         "app=dcgm-exporter",
+			Enabled:          true,
+		}
+
+		scraper := mocks.NewMockScraper(t)
+		mapper := mocks.NewMockMetricMapper(t)
+		client := castai_mock.NewMockClient(t)
+
+		ex := exporter.NewExporter(config, kubeClient, log, scraper, mapper, client)
+		ex.Enable()
+
+		metricFamilies := []exporter.MetricFamilyMap{
+			{
+				"test_gauge": {
+					Type: dto.MetricType_GAUGE.Enum(),
+					Metric: []*dto.Metric{
+						{
+							Label: []*dto.LabelPair{
+								newLabelPair("label1", "value1"),
+							},
+							Gauge: newGauge(1.0),
+						},
+					},
+				},
+				exporter.MetricGraphicsEngineActive: {
+					Type: dto.MetricType_GAUGE.Enum(),
+					Metric: []*dto.Metric{
+						{
+							Label: []*dto.LabelPair{
+								newLabelPair("label1", "value1"),
+							},
+							Gauge: newGauge(1.0),
+						},
+					},
+				},
+			},
+		}
+
+		batch := &pb.MetricsBatch{}
+
+		scraper.EXPECT().Scrape(ctx, []string{"http://192.168.1.1:9400/metrics"}).Times(1).Return(metricFamilies, nil)
+		mapper.EXPECT().Map(metricFamilies).Times(1).Return(batch, nil)
+		client.EXPECT().UploadBatch(mock.Anything, batch).Times(1).Return(nil, nil)
+
+		go func() {
+			err := ex.Start(ctx)
+			if err != nil && !errors.Is(err, context.Canceled) {
+				t.Errorf("unexpected error: %v", err)
+			}
+		}()
+
+		time.Sleep(2400 * time.Millisecond)
+
+		r := require.New(t)
+		r.True(ex.Enabled())
 	})
 
-	config := exporter.Config{
-		ExportInterval:   2 * time.Second,
-		DCGMExporterPort: 9400,
-		DCGMExporterPath: "/metrics",
-		Selector:         "app=dcgm-exporter",
-		Enabled:          true,
-	}
+	t.Run("scrapes single host provided in config", func(t *testing.T) {
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
 
-	scraper := mocks.NewMockScraper(t)
-	mapper := mocks.NewMockMetricMapper(t)
-	client := castai_mock.NewMockClient(t)
+		kubeClient := fake.NewSimpleClientset()
 
-	ex := exporter.NewExporter(config, kubeClient, log, scraper, mapper, client)
-	ex.Enable()
-
-	metricFamilies := []exporter.MetricFamilyMap{
-		{
-			"test_gauge": {
-				Type: dto.MetricType_GAUGE.Enum(),
-				Metric: []*dto.Metric{
-					{
-						Label: []*dto.LabelPair{
-							newLabelPair("label1", "value1"),
-						},
-						Gauge: newGauge(1.0),
-					},
-				},
-			},
-			exporter.MetricGraphicsEngineActive: {
-				Type: dto.MetricType_GAUGE.Enum(),
-				Metric: []*dto.Metric{
-					{
-						Label: []*dto.LabelPair{
-							newLabelPair("label1", "value1"),
-						},
-						Gauge: newGauge(1.0),
-					},
-				},
-			},
-		},
-	}
-
-	batch := &pb.MetricsBatch{}
-
-	scraper.EXPECT().Scrape(ctx, []string{"http://192.168.1.1:9400/metrics"}).Times(1).Return(metricFamilies, nil)
-	mapper.EXPECT().Map(metricFamilies).Times(1).Return(batch, nil)
-	client.EXPECT().UploadBatch(mock.Anything, batch).Times(1).Return(nil, nil)
-
-	go func() {
-		err := ex.Start(ctx)
-		if err != nil && !errors.Is(err, context.Canceled) {
-			t.Errorf("unexpected error: %v", err)
+		config := exporter.Config{
+			ExportInterval:   2 * time.Second,
+			DCGMExporterPort: 9400,
+			DCGMExporterPath: "/metrics",
+			DCGMExporterHost: "localhost",
+			Enabled:          true,
 		}
-	}()
 
-	time.Sleep(2400 * time.Millisecond)
+		scraper := mocks.NewMockScraper(t)
+		mapper := mocks.NewMockMetricMapper(t)
+		client := castai_mock.NewMockClient(t)
 
-	r := require.New(t)
-	r.True(ex.Enabled())
+		ex := exporter.NewExporter(config, kubeClient, log, scraper, mapper, client)
+		ex.Enable()
+
+		metricFamilies := []exporter.MetricFamilyMap{
+			{
+				"test_gauge": {
+					Type: dto.MetricType_GAUGE.Enum(),
+					Metric: []*dto.Metric{
+						{
+							Label: []*dto.LabelPair{
+								newLabelPair("label1", "value1"),
+							},
+							Gauge: newGauge(1.0),
+						},
+					},
+				},
+				exporter.MetricGraphicsEngineActive: {
+					Type: dto.MetricType_GAUGE.Enum(),
+					Metric: []*dto.Metric{
+						{
+							Label: []*dto.LabelPair{
+								newLabelPair("label1", "value1"),
+							},
+							Gauge: newGauge(1.0),
+						},
+					},
+				},
+			},
+		}
+
+		batch := &pb.MetricsBatch{}
+
+		scraper.EXPECT().Scrape(ctx, []string{"http://localhost:9400/metrics"}).Times(1).Return(metricFamilies, nil)
+		mapper.EXPECT().Map(metricFamilies).Times(1).Return(batch, nil)
+		client.EXPECT().UploadBatch(mock.Anything, batch).Times(1).Return(nil, nil)
+
+		go func() {
+			err := ex.Start(ctx)
+			if err != nil && !errors.Is(err, context.Canceled) {
+				t.Errorf("unexpected error: %v", err)
+			}
+		}()
+
+		time.Sleep(2400 * time.Millisecond)
+
+		r := require.New(t)
+		r.True(ex.Enabled())
+	})
 }
