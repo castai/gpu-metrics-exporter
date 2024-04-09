@@ -1,3 +1,4 @@
+{{ if .Values.dcgmExporter.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -26,3 +27,4 @@ data:
     DCGM_FI_PROF_PCIE_RX_BYTES, gauge, Total number of bytes received through PCIe RX
     DCGM_FI_DEV_PCIE_LINK_GEN, gauge, PCIe Current Link Generation.
     DCGM_FI_DEV_PCIE_LINK_WIDTH, gauge, PCIe Current Link Width.
+{{- end }}
