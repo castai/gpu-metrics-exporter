@@ -30,3 +30,26 @@ DCGM_FI_DEV_GPU_TEMP
 DCGM_FI_DEV_MEMORY_TEMP
 DCGM_FI_DEV_POWER_USAGE
 ```
+
+## Installation
+
+### Helm
+
+You can clone this repository and install the chart with the following commands:
+```bash
+$ cd charts/gpu-metrics-exporter
+$ helm install --generate-name <deployment-name> -f values.yaml -f values-<k8s-provider>.yaml .
+```
+Where:
+* `<deployment-name>` is a name of your choice
+* `<k8s-provider>` is the name of the k8s provider you are using (e.g. `eks`, `gke`, `aks`)
+   * this sets the proper node affinity so the Daemon Set only runs on nodes with GPUs
+
+By default, it will be deployed as a sidecar to the DCGM exporter. 
+If you don't want to deploy it as a sidecar, in the values.yaml file you can:
+1. Set `dcgmExporter.enabled` to false
+2. Set the `DCGM_HOST` and `DCGM_LABELS` environment variables in `gpuMetricsExporter.config` of 
+   the values.yaml file
+   1. `DCGM_HOST` is the address of the DCGM exporter instance
+   2. `DCGM_LABELS` is a comma-separated list of labels that the DCGM instances have
+
