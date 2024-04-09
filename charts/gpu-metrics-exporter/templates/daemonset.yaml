@@ -46,17 +46,12 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.affinity }}
       affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: cloud.google.com/gke-accelerator
-                    operator: Exists
-      {{- with .Values.tolerations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       tolerations:
         - operator: "Exists"
-      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
