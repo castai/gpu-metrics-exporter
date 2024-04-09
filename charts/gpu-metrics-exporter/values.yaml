@@ -1,10 +1,5 @@
 imagePullSecrets: []
 
-serviceAccount:
-  create: true
-  automount: true
-  annotations: {}
-
 podAnnotations: {}
 podLabels: {}
 
@@ -14,6 +9,12 @@ service:
   type: ClusterIP
   port: 6061
 
+additionalVolumes: []
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: { }
 gpuMetricsExporter:
   image:
     repository: ghcr.io/castai/gpu-metrics-exporter/gpu-metrics-exporter
@@ -29,3 +30,12 @@ gpuMetricsExporter:
       memory: 128Mi
   securityContext: {}
   volumeMounts: []
+
+dcgmExporter:
+  enabled: true
+  arguments: ["-f", "/etc/dcgm-exporter/dcp-metrics-included.csv"]
+  image:
+    repository: nvcr.io/nvidia/k8s/dcgm-exporter
+    pullPolicy: IfNotPresent
+    tag: 3.3.5-3.4.1-ubuntu22.04
+  additionalEnv: []
