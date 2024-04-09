@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
   name: {{ include "gpu-metrics-exporter.fullname" . }}
   labels:
@@ -27,33 +27,6 @@ spec:
       serviceAccountName: {{ include "gpu-metrics-exporter.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      containers:
-        - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
-              protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /healthz
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /healthz
-              port: http
-          envFrom:
-            - configMapRef:
-                name: gpu-metrics-exporter-config
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-          {{- with .Values.volumeMounts }}
-          volumeMounts:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
       {{- with .Values.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}
@@ -70,3 +43,30 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.gpuMetricsExporter.securityContext | nindent 12 }}
+          image: "{{ .Values.gpuMetricsExporter.image.repository }}:{{ .Values.gpuMetricsExporter.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.gpuMetricsExporter.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          envFrom:
+            - configMapRef:
+                name: gpu-metrics-exporter-config
+          resources:
+            {{- toYaml .Values.gpuMetricsExporter.resources | nindent 12 }}
+          {{- with .Values.gpuMetricsExporter.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}

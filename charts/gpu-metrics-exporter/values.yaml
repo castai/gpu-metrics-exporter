@@ -1,8 +1,3 @@
-image:
-  repository: ghcr.io/castai/gpu-metrics-exporter/gpu-metrics-exporter
-  pullPolicy: IfNotPresent
-  tag: ""
-
 imagePullSecrets: []
 
 serviceAccount:
@@ -15,18 +10,22 @@ podLabels: {}
 
 podSecurityContext: {}
 
-securityContext: {}
-
 service:
   type: ClusterIP
   port: 6061
 
-resources: 
-  limits:
-    cpu: 100m
-    memory: 128Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi
-
-config: {}
+gpuMetricsExporter:
+  image:
+    repository: ghcr.io/castai/gpu-metrics-exporter/gpu-metrics-exporter
+    pullPolicy: IfNotPresent
+    tag: ""
+  config: {}
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  securityContext: {}
+  volumeMounts: []
