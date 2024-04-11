@@ -3,6 +3,6 @@ kind: ConfigMap
 metadata:
   name: gpu-metrics-exporter-config
 data:
-{{- with .Values.config }}
+{{- with .Values.gpuMetricsExporter.config }}
   {{- toYaml . | nindent 2 }}
 {{- end }}
