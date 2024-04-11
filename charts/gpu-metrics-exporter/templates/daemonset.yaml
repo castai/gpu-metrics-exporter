@@ -73,6 +73,11 @@ spec:
           envFrom:
             - configMapRef:
                 name: gpu-metrics-exporter-config
+          {{- if .Values.dcgmExporter.enabled}}
+          env:
+            - name: "DCGM_HOST"
+              value: "localhost"
+          {{- end }}
           resources:
             {{- toYaml .Values.gpuMetricsExporter.resources | nindent 12 }}
           {{- with .Values.gpuMetricsExporter.volumeMounts }}
