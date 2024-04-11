@@ -11,12 +11,18 @@ on:
     branches:
       - main
 
+env:
+  CR_CONFIGFILE: "${{ github.workspace }}/cr.yaml"
+  CR_INDEX_PATH: "${{ github.workspace }}/.cr-index"
+  CR_PACKAGE_PATH: "${{ github.workspace }}/.cr-release-packages"
+  CR_TOOL_PATH: "${{ github.workspace }}/.cr-tool"
+  CHART_PATH: "${{ github.workspace }}/charts/gpu-metrics-exporter"
+
 jobs:
   build:
     name: Build
     runs-on: ubuntu-22.04
     steps:
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -24,7 +30,6 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: 1.22
-
 
       - name: Get release tag
         if: github.event_name == 'release'
@@ -91,3 +96,107 @@ jobs:
           tags: |
             ghcr.io/castai/gpu-metrics-exporter/gpu-metrics-exporter:${{ env.RELEASE_TAG }}
             ghcr.io/castai/gpu-metrics-exporter/gpu-metrics-exporter:latest
+
+      - name: Checkout helm-charts
+        if: ${{ github.event_name == 'release' }}
+        # The cr tool only works if the target repository is already checked out
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          repository: castai/helm-charts
+          path: helm-charts
+          token: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
+
+      - name: Configure Git for helm-charts
+        if: ${{ github.event_name == 'release' }}
+        run: |
+          cd helm-charts
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Install Helm
+        if: ${{ github.event_name == 'release' }}
+        uses: azure/setup-helm@v4.1.0
+        id: install
+
+      - name: Install CR tool
+        if: ${{ github.event_name == 'release' }}
+        run: |
+          mkdir "${CR_TOOL_PATH}"
+          mkdir "${CR_PACKAGE_PATH}"
+          mkdir "${CR_INDEX_PATH}"
+          curl -sSLo cr.tar.gz "https://github.com/helm/chart-releaser/releases/download/v1.6.1/chart-releaser_1.6.1_linux_amd64.tar.gz"
+          tar -xzf cr.tar.gz -C "${CR_TOOL_PATH}"
+          rm -f cr.tar.gz
+
+      - name: Bump chart version
+        if: ${{ github.event_name == 'release' }}
+        run: |
+          python ./.github/workflows/bump_chart.py ${CHART_PATH}/Chart.yaml ${{env.RELEASE_TAG}}
+
+      - name: Parse Chart.yaml
+        if: ${{ github.event_name == 'release' }}
+        id: parse-chart
+        run: |
+          description=$(yq ".description" < ${CHART_PATH}/Chart.yaml)
+          name=$(yq ".name" < ${CHART_PATH}/Chart.yaml)
+          version=$(yq ".version" < ${CHART_PATH}/Chart.yaml)
+          echo "::set-output name=chartpath::${CHART_PATH}"
+          echo "::set-output name=desc::${description}"
+          if [[ -n "${HELM_TAG_PREFIX}" ]]; then
+            echo "::set-output name=tagname::${name}-${version}"
+          else
+            echo "::set-output name=tagname::${name}-${version}"
+          fi
+          echo "::set-output name=packagename::${name}-${version}"
+
+      - name: Create helm package
+        if: ${{ github.event_name == 'release' }}
+        run: |
+          "${CR_TOOL_PATH}/cr" package "${{ steps.parse-chart.outputs.chartpath }}" --config "${CR_CONFIGFILE}" --package-path "${CR_PACKAGE_PATH}"
+          echo "Result of chart package:"
+          ls -l "${CR_PACKAGE_PATH}"
+          git status
+
+      - name: Make helm charts github release
+        if: ${{ github.event_name == 'release' }}
+        uses: softprops/action-gh-release@v1
+        with:
+          body: |
+            ${{ steps.parse-chart.outputs.desc }}
+            Source commit: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+          files: |
+            ${{ env.CR_PACKAGE_PATH }}/${{ steps.parse-chart.outputs.packagename }}.tgz
+            ${{ env.CR_PACKAGE_PATH }}/${{ steps.parse-chart.outputs.packagename }}.tgz.prov
+          repository: castai/helm-charts
+          tag_name: ${{ steps.parse-chart.outputs.tagname }}
+          token: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
+
+      - name: Update helm repo index.yaml
+        if: ${{ github.event_name == 'release' }}
+        run: |
+          cd helm-charts
+          "${CR_TOOL_PATH}/cr" index --config "${CR_CONFIGFILE}" --token "${{ secrets.HELM_CHARTS_REPO_TOKEN }}" --index-path "${CR_INDEX_PATH}" --package-path "${CR_PACKAGE_PATH}" --push
+
+      - name: Commit Chart.yaml changes
+        if: ${{ github.event_name == 'release' }}
+        run: |
+          git status
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git checkout main
+          git add ${CHART_PATH}/Chart.yaml
+          git commit -m "[Release] Update Chart.yaml"
+          git push
+
+      - name: Sync chart with helm-charts github
+        if: ${{ github.event_name == 'release' }}
+        run: |
+          cd helm-charts
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git checkout main
+          cp -r ${CHART_PATH}/* ./charts/gpu-metrics-exporter
+          git add charts/gpu-metrics-exporter
+          git commit -m "Update gpu-metrics-exporter chart to ${{env.RELEASE_TAG}}"
+          git push
