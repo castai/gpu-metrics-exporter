@@ -44,5 +44,3 @@ dcgmExporter:
   securityContext:
     privileged: true
     readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
-    runAsNonRoot: true
