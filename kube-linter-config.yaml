@@ -2,6 +2,4 @@ checks:
   exclude:
     - "unset-cpu-requirements"
     - "unset-memory-requirements"
-    - "privileged-container"
-    - "run-as-non-root"
-    - "privilege-escalation-container"
+
