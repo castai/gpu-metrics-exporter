@@ -184,11 +184,12 @@ jobs:
           git status
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          git add ${CHART_PATH}/Chart.yaml
-          git stash -m "Stash uncommitted changes" -- ${CHART_PATH}/Chart.yaml
+          git add charts/gpu-metrics-exporter/Chart.yaml
+          git stash 
           git fetch
           git checkout main
           git stash pop
+          git add charts/gpu-metrics-exporter/Chart.yaml
           git commit -m "[Release] Update Chart.yaml"
           git push
 
