@@ -200,6 +200,7 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
           git checkout main
+          mkdir -p ./charts/gpu-metrics-exporter
           cp -r ${CHART_PATH}/* ./charts/gpu-metrics-exporter
           git add charts/gpu-metrics-exporter
           git commit -m "Update gpu-metrics-exporter chart to ${{env.RELEASE_TAG}}"
