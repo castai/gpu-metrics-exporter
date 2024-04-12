@@ -28,7 +28,9 @@ gpuMetricsExporter:
     requests:
       cpu: 100m
       memory: 128Mi
-  securityContext: {}
+  securityContext:
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
   volumeMounts: []
 
 dcgmExporter:
@@ -39,3 +41,8 @@ dcgmExporter:
     pullPolicy: IfNotPresent
     tag: 3.3.5-3.4.1-ubuntu22.04
   additionalEnv: []
+  securityContext:
+    privileged: true
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true

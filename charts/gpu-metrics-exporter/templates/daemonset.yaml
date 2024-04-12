@@ -95,7 +95,7 @@ spec:
             - name: metrics
               containerPort: 9400
           securityContext:
-            privileged: true
+            {{- toYaml .Values.dcgmExporter.securityContext | nindent 12 }}
           env:
             - name: NODE_NAME
               valueFrom:
