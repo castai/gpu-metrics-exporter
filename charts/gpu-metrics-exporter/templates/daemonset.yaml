@@ -30,9 +30,9 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       volumes:
         {{- if .Values.dcgmExporter.enabled }}
-        - name: dcgm-exporter-metrics
+        - name: {{- include "dcgm-exporter.config-map" . | indent 1 }}
           configMap:
-            name: dcgm-exporter-metrics
+            name: {{- include "dcgm-exporter.config-map" . | indent 1 }}
         - name: nvidia-install-dir-host
           hostPath:
             path: /home/kubernetes/bin/nvidia
@@ -73,7 +73,7 @@ spec:
               port: http
           envFrom:
             - configMapRef:
-                name: gpu-metrics-exporter-config
+                name: {{- include "gpu-metrics-exporter.config-map" . | indent 1}}
           {{- if .Values.dcgmExporter.enabled}}
           env:
             - name: "DCGM_HOST"
@@ -116,7 +116,7 @@ spec:
             {{- toYaml . | nindent 12 }}
             {{- end }}
           volumeMounts:
-            - name: dcgm-exporter-metrics
+            - name: {{- include "dcgm-exporter.config-map" . | indent 1 }}
               mountPath: "/etc/dcgm-exporter"
               readOnly: true
             - name: nvidia-install-dir-host
