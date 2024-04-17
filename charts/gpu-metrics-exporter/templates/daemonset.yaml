@@ -7,7 +7,7 @@ metadata:
     {{- include "gpu-metrics-exporter.labels" . | nindent 4 }}
   annotations:
     {{- if .Values.dcgmExporter.enabled }}
-    ignore-check.kube-linter.io/privileged-container: "This daemon set needs to run DCGM Exporter as privileged to access the GPU metrics.."
+    ignore-check.kube-linter.io/privileged-container: "This daemon set needs to run DCGM Exporter as privileged to access the GPU metrics."
     ignore-check.kube-linter.io/run-as-non-root: "This daemon set needs to run DCGM Exporter as root to access the GPU metrics."
     ignore-check.kube-linter.io/privilege-escalation-container: "This daemon set needs escalate privileges for DCGM Exporter to access the GPU metrics."
     {{-end }}
