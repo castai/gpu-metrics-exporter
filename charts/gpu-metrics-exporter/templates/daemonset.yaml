@@ -91,7 +91,11 @@ spec:
           imagePullPolicy: {{ .Values.dcgmExporter.image.pullPolicy }}
           command: [ "/bin/bash", "-c" ]
           args:
+          {{- if .Values.dcgmExporter.useExternalHostEngine }}
+            - hostname $NODE_NAME; dcgm-exporter --remote-hostengine-info $(NODE_IP) --collectors /etc/dcgm-exporter/counters.csv
+          {{- else }}
             - hostname $NODE_NAME; dcgm-exporter --collectors /etc/dcgm-exporter/counters.csv
+          {{- end }}
           ports:
             - name: metrics
               containerPort: 9400
@@ -102,6 +106,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+            - name: NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
             - name: "DCGM_EXPORTER_KUBERNETES_GPU_ID_TYPE"
               value: "device-name"
             - name: LD_LIBRARY_PATH
