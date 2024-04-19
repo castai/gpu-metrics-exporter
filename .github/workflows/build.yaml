@@ -155,7 +155,7 @@ jobs:
 
       - name: Make helm charts github release
         if: ${{ github.event_name == 'release' }}
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2.0.4
         with:
           body: |
             ${{ steps.parse-chart.outputs.desc }}
