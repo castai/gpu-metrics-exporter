@@ -141,11 +141,10 @@ jobs:
           description=$(yq ".description" < ${CHART_PATH}/Chart.yaml)
           name=$(yq ".name" < ${CHART_PATH}/Chart.yaml)
           version=$(yq ".version" < ${CHART_PATH}/Chart.yaml)
-          echo "chartpath::${CHART_PATH}" >> $GITHUB_OUTPUT
-          echo "desc::${description}" >> $GITHUB_OUTPUT
-          echo "tagname::${name}-${version}" >> $GITHUB_OUTPUT
-          echo "packagename::${name}-${version}" >> $GITHUB_OUTPUT
-
+          echo "chartpath=${CHART_PATH}" >> $GITHUB_OUTPUT
+          echo "desc=${description}" >> $GITHUB_OUTPUT
+          echo "tagname=${name}-${version}" >> $GITHUB_OUTPUT
+          echo "packagename=${name}-${version}" >> $GITHUB_OUTPUT
       - name: Create helm package
         if: ${{ github.event_name == 'release' }}
         run: |
