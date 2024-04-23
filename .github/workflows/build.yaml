@@ -132,6 +132,7 @@ jobs:
       - name: Bump chart version
         if: ${{ github.event_name == 'release' }}
         run: |
+          echo "Release tag is ${{env.RELEASE_TAG}}"
           python ./.github/workflows/bump_chart.py ${CHART_PATH}/Chart.yaml ${{env.RELEASE_TAG}}
 
       - name: Parse Chart.yaml

@@ -6,6 +6,7 @@ if len(sys.argv) < 2 or sys.argv[1] == '':
 
 new_app_version=''
 if len(sys.argv) >= 3 and sys.argv[2] != '':
+    print(f'New appVersion: {sys.argv[2]}')
     new_app_version=sys.argv[2]
 
 chart_yaml_path=sys.argv[1]
