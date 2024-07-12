@@ -17,6 +17,7 @@ func NewMapper() MetricMapper {
 func (p metricMapper) Map(metricFamilyMaps []MetricFamilyMap) *pb.MetricsBatch {
 	metrics := &pb.MetricsBatch{}
 	metricsMap := make(map[string]*pb.Metric)
+
 	for _, familyMap := range metricFamilyMaps {
 		for name, family := range familyMap {
 			if _, found := EnabledMetrics[name]; !found {
@@ -31,7 +32,9 @@ func (p metricMapper) Map(metricFamilyMaps []MetricFamilyMap) *pb.MetricsBatch {
 				metricsMap[name] = metric
 				metrics.Metrics = append(metrics.Metrics, metric)
 			}
+
 			t := family.Type.String()
+
 			for _, m := range family.Metric {
 				labels := make([]*pb.Metric_Label, len(m.Label))
 				for i, label := range m.Label {
