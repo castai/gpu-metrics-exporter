@@ -53,6 +53,12 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+      tolerations:
+        - operator: "Exists"
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -92,9 +98,9 @@ spec:
           command: [ "/bin/bash", "-c" ]
           args:
           {{- if .Values.dcgmExporter.useExternalHostEngine }}
-            - hostname $NODE_NAME; test ! -f /usr/local/nvidia/lib64 && top || dcgm-exporter --remote-hostengine-info $(NODE_IP) --collectors /etc/dcgm-exporter/counters.csv
+            - hostname $NODE_NAME; for ((;;)) { r=$(dcgm-exporter --remote-hostengine-info $(NODE_IP) --collectors /etc/dcgm-exporter/counters.csv); echo "dcgm-exporter could not run"; sleep 30 ; }
           {{- else }}
-            - hostname $NODE_NAME; test ! -f /usr/local/nvidia/lib64 && top || dcgm-exporter --collectors /etc/dcgm-exporter/counters.csv
+            - hostname $NODE_NAME; for ((;;)) { r=$(dcgm-exporter --collectors /etc/dcgm-exporter/counters.csv); echo "dcgm-exporter could not run"; sleep 30 ; }
           {{- end }}
           ports:
             - name: metrics
