@@ -140,6 +140,11 @@ func (e *exporter) export(ctx context.Context) error {
 	}
 
 	batch := e.mapper.Map(metricFamilies)
+	if len(batch.Metrics) == 0 {
+		e.log.Warn("no metrics to export from activated metrics, scraped %d metrics from dcgm-exporter", len(metricFamilies))
+		return nil
+	}
+
 	if err := e.client.UploadBatch(ctx, batch); err != nil {
 		return fmt.Errorf("error whlie sending %d metrics to castai %w", len(batch.Metrics), err)
 	}

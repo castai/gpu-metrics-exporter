@@ -81,7 +81,13 @@ func TestExporter_Running(t *testing.T) {
 			},
 		}
 
-		batch := &pb.MetricsBatch{}
+		batch := &pb.MetricsBatch{
+			Metrics: []*pb.Metric{
+				{
+					Name: exporter.MetricGraphicsEngineActive,
+				},
+			},
+		}
 
 		scraper.EXPECT().Scrape(ctx, []string{"http://192.168.1.1:9400/metrics"}).Times(1).Return(metricFamilies, nil)
 		mapper.EXPECT().Map(metricFamilies).Times(1).Return(batch, nil)
@@ -148,11 +154,83 @@ func TestExporter_Running(t *testing.T) {
 			},
 		}
 
-		batch := &pb.MetricsBatch{}
+		batch := &pb.MetricsBatch{
+			Metrics: []*pb.Metric{
+				{
+					Name: exporter.MetricGraphicsEngineActive,
+				},
+			},
+		}
 
 		scraper.EXPECT().Scrape(ctx, []string{"http://localhost:9400/metrics"}).Times(1).Return(metricFamilies, nil)
 		mapper.EXPECT().Map(metricFamilies).Times(1).Return(batch, nil)
 		client.EXPECT().UploadBatch(mock.Anything, batch).Times(1).Return(nil, nil)
+
+		go func() {
+			err := ex.Start(ctx)
+			if err != nil && !errors.Is(err, context.Canceled) {
+				t.Errorf("unexpected error: %v", err)
+			}
+		}()
+
+		time.Sleep(2400 * time.Millisecond)
+
+		r := require.New(t)
+		r.True(ex.Enabled())
+	})
+
+	t.Run("don't send empty batch of metrics", func(t *testing.T) {
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		kubeClient := fake.NewSimpleClientset()
+
+		config := exporter.Config{
+			ExportInterval:   2 * time.Second,
+			DCGMExporterPort: 9400,
+			DCGMExporterPath: "/metrics",
+			DCGMExporterHost: "localhost",
+			Enabled:          true,
+		}
+
+		scraper := mocks.NewMockScraper(t)
+		mapper := mocks.NewMockMetricMapper(t)
+		client := castai_mock.NewMockClient(t)
+
+		ex := exporter.NewExporter(config, kubeClient, log, scraper, mapper, client)
+		ex.Enable()
+
+		metricFamilies := []exporter.MetricFamilyMap{
+			{
+				"test_gauge": {
+					Type: dto.MetricType_GAUGE.Enum(),
+					Metric: []*dto.Metric{
+						{
+							Label: []*dto.LabelPair{
+								newLabelPair("label1", "value1"),
+							},
+							Gauge: newGauge(1.0),
+						},
+					},
+				},
+				exporter.MetricGraphicsEngineActive: {
+					Type: dto.MetricType_GAUGE.Enum(),
+					Metric: []*dto.Metric{
+						{
+							Label: []*dto.LabelPair{
+								newLabelPair("label1", "value1"),
+							},
+							Gauge: newGauge(1.0),
+						},
+					},
+				},
+			},
+		}
+
+		batch := &pb.MetricsBatch{}
+
+		scraper.EXPECT().Scrape(ctx, []string{"http://localhost:9400/metrics"}).Times(1).Return(metricFamilies, nil)
+		mapper.EXPECT().Map(metricFamilies).Times(1).Return(batch, nil)
 
 		go func() {
 			err := ex.Start(ctx)
