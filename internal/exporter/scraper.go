@@ -87,7 +87,6 @@ func (s scraper) Scrape(ctx context.Context, urls []string) ([]MetricFamilyMap, 
 		metrics = append(metrics, result.metricFamilyMap)
 	}
 
-	s.log.Infof("scraped %d urls for %d metrics", len(urls), len(metrics))
 	return metrics, nil
 }
 

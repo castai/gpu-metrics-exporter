@@ -1,4 +1,4 @@
-provider: "eks" # gke | eks | aks
+provider: "" # gke | eks | aks
 imagePullSecrets: []
 
 serviceAccount:

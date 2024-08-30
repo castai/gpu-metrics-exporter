@@ -2,8 +2,9 @@ package exporter
 
 import (
 	"fmt"
-	"github.com/castai/gpu-metrics-exporter/pb"
 	"strings"
+
+	"github.com/castai/gpu-metrics-exporter/pb"
 )
 
 type MetricName = string

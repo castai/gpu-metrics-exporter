@@ -1,11 +1,13 @@
 package exporter
 
 import (
-	"github.com/castai/gpu-metrics-exporter/pb"
-	"github.com/stretchr/testify/require"
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/castai/gpu-metrics-exporter/pb"
 )
 
 func TestMetricsBatchAggregate(t *testing.T) {
