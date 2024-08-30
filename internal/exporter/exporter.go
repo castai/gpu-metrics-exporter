@@ -21,6 +21,7 @@ type Exporter interface {
 }
 
 type Config struct {
+	ScrapeInterval   time.Duration
 	ExportInterval   time.Duration
 	DCGMExporterPort int
 	DCGMExporterPath string
@@ -62,20 +63,32 @@ func NewExporter(
 }
 
 func (e *exporter) Start(ctx context.Context) error {
+	scrapeTicker := time.NewTicker(e.cfg.ScrapeInterval)
 	exportTicker := time.NewTicker(e.cfg.ExportInterval)
 	defer exportTicker.Stop()
-
+	batch := NewMetricsBatch()
 	for {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
+		case <-scrapeTicker.C:
+			if !e.enabled.Load() {
+				continue
+			}
+			newBatch, err := e.scrape(ctx)
+			if err != nil {
+				e.log.Errorf("scraper error: %v", err)
+				continue
+			}
+			batch.aggregate(newBatch)
 		case <-exportTicker.C:
 			if !e.enabled.Load() {
 				continue
 			}
-			if err := e.export(ctx); err != nil {
+			if err := e.export(ctx, batch); err != nil {
 				e.log.Errorf("export error: %v", err)
 			}
+			batch = NewMetricsBatch()
 		}
 	}
 }
@@ -119,34 +132,45 @@ func (e *exporter) getDCGMUrls(ctx context.Context) ([]string, error) {
 	return urls, nil
 }
 
-func (e *exporter) export(ctx context.Context) error {
+func (e *exporter) scrape(ctx context.Context) (*MetricsBatch, error) {
 	urls, err := e.getDCGMUrls(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if len(urls) == 0 {
 		e.log.Info("no dcgm-exporter instances to scrape")
-		return nil
+		return nil, nil
 	}
 
 	metricFamilies, err := e.scraper.Scrape(ctx, urls)
 	if err != nil {
-		return fmt.Errorf("couldn't scrape DCGM exporters %w", err)
+		return nil, fmt.Errorf("couldn't scrape DCGM exporters %w", err)
 	}
 	if len(metricFamilies) == 0 {
 		e.log.Warnf("no metrics collected from %d dcgm-exporters", len(urls))
-		return nil
+		return nil, nil
 	}
+
+	e.log.Debugf("scraped %d dcgm-exporters", len(urls))
 
 	batch := e.mapper.Map(metricFamilies)
-	if len(batch.Metrics) == 0 {
-		e.log.Warn("no metrics to export from activated metrics, scraped %d metrics from dcgm-exporter", len(metricFamilies))
+
+	return batch, nil
+}
+
+func (e *exporter) export(ctx context.Context, batch *MetricsBatch) error {
+	if batch == nil {
 		return nil
 	}
 
-	if err := e.client.UploadBatch(ctx, batch); err != nil {
-		return fmt.Errorf("error whlie sending %d metrics to castai %w", len(batch.Metrics), err)
+	if len(batch.Metrics) == 0 {
+		e.log.Warn("no metrics to export from activated metrics")
+		return nil
+	}
+
+	if err := e.client.UploadBatch(ctx, batch.ToProto()); err != nil {
+		return fmt.Errorf("error while sending %d metrics to castai %w", len(batch.Metrics), err)
 	}
 
 	e.log.Infof("successfully exported %d metrics", len(batch.Metrics))

@@ -4,12 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
-
+	"github.com/castai/gpu-metrics-exporter/internal/castai"
+	"github.com/castai/gpu-metrics-exporter/internal/config"
+	"github.com/castai/gpu-metrics-exporter/internal/exporter"
+	"github.com/castai/gpu-metrics-exporter/internal/server"
 	"github.com/go-resty/resty/v2"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/labels"
@@ -17,11 +15,11 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/flowcontrol"
-
-	"github.com/castai/gpu-metrics-exporter/internal/castai"
-	"github.com/castai/gpu-metrics-exporter/internal/config"
-	"github.com/castai/gpu-metrics-exporter/internal/exporter"
-	"github.com/castai/gpu-metrics-exporter/internal/server"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 var (
@@ -89,6 +87,7 @@ func run(cfg *config.Config, log logrus.FieldLogger) error {
 	scraper := exporter.NewScraper(&http.Client{}, log)
 	mapper := exporter.NewMapper()
 	ex := exporter.NewExporter(exporter.Config{
+		ScrapeInterval:   cfg.ScrapeInterval,
 		ExportInterval:   cfg.ExportInterval,
 		Selector:         labelSelector.String(),
 		DCGMExporterPort: cfg.DCGMPort,

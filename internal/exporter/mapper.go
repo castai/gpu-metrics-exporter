@@ -1,11 +1,7 @@
 package exporter
 
-import (
-	"github.com/castai/gpu-metrics-exporter/pb"
-)
-
 type MetricMapper interface {
-	Map(metrics []MetricFamilyMap) *pb.MetricsBatch
+	Map(metrics []MetricFamilyMap) *MetricsBatch
 }
 
 type metricMapper struct{}
@@ -14,34 +10,26 @@ func NewMapper() MetricMapper {
 	return &metricMapper{}
 }
 
-func (p metricMapper) Map(metricFamilyMaps []MetricFamilyMap) *pb.MetricsBatch {
-	metrics := &pb.MetricsBatch{}
-	metricsMap := make(map[string]*pb.Metric)
-
+func (p metricMapper) Map(metricFamilyMaps []MetricFamilyMap) *MetricsBatch {
+	newBatch := NewMetricsBatch()
 	for _, familyMap := range metricFamilyMaps {
 		for name, family := range familyMap {
 			if _, found := EnabledMetrics[name]; !found {
 				continue
 			}
 
-			metric, found := metricsMap[name]
+			metric, found := newBatch.Metrics[name]
 			if !found {
-				metric = &pb.Metric{
-					Name: name,
-				}
-				metricsMap[name] = metric
-				metrics.Metrics = append(metrics.Metrics, metric)
+				metric = MeasurementsByLabelKey{}
+				newBatch.Metrics[name] = metric
 			}
 
 			t := family.Type.String()
 
 			for _, m := range family.Metric {
-				labels := make([]*pb.Metric_Label, len(m.Label))
-				for i, label := range m.Label {
-					labels[i] = &pb.Metric_Label{
-						Name:  *label.Name,
-						Value: *label.Value,
-					}
+				labels := make(map[string]string, len(m.Label))
+				for _, label := range m.Label {
+					labels[*label.Name] = *label.Value
 				}
 				var newValue float64
 				switch t {
@@ -51,13 +39,11 @@ func (p metricMapper) Map(metricFamilyMaps []MetricFamilyMap) *pb.MetricsBatch {
 					newValue = *m.GetGauge().Value
 				}
 
-				metric.Measurements = append(metric.Measurements, &pb.Metric_Measurement{
-					Value:  newValue,
-					Labels: labels,
-				})
+				msrmt := newMeasurement(newValue, labels)
+				metric[msrmt.LabelsKey] = msrmt
 			}
 		}
 	}
 
-	return metrics
+	return newBatch
 }

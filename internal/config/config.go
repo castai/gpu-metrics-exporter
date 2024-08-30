@@ -14,7 +14,8 @@ type Config struct {
 	DCGMPort            int               `envconfig:"DCGM_PORT" default:"9400"`
 	DCGMMetricsEndpoint string            `envconfig:"DCGM_METRICS_ENDPOINT" default:"/metrics"`
 	DCGMHost            string            `envconfig:"DCGM_HOST"`
-	ExportInterval      time.Duration     `envconfig:"EXPORT_INTERVAL" default:"15s"`
+	ScrapeInterval      time.Duration     `envconfig:"SCRAPE_INTERVAL" default:"15s"`
+	ExportInterval      time.Duration     `envconfig:"EXPORT_INTERVAL" default:"1m"`
 	CastAPI             string            `envconfig:"CAST_API" default:"https://api.cast.ai"`
 	ClusterID           string            `envconfig:"CLUSTER_ID"`
 	APIKey              string            `envconfig:"API_KEY"`

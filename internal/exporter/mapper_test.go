@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/castai/gpu-metrics-exporter/internal/exporter"
-	"github.com/castai/gpu-metrics-exporter/pb"
 )
 
 func newGauge(value float64) *dto.Gauge {
@@ -27,10 +26,10 @@ func TestMetricMapper_Map(t *testing.T) {
 	mapper := exporter.NewMapper()
 
 	t.Run("empty input yields empty MetricsBatch", func(t *testing.T) {
-		metricFamilyMaps := []exporter.MetricFamilyMap{}
+		var metricFamilyMaps []exporter.MetricFamilyMap
 
 		got := mapper.Map(metricFamilyMaps)
-		expected := &pb.MetricsBatch{}
+		expected := &exporter.MetricsBatch{}
 
 		r := require.New(t)
 		r.Equal(expected, got)
@@ -54,7 +53,7 @@ func TestMetricMapper_Map(t *testing.T) {
 		}
 
 		got := mapper.Map(metricFamilyMaps)
-		expected := &pb.MetricsBatch{}
+		expected := &exporter.MetricsBatch{}
 
 		r := require.New(t)
 		r.Equal(expected, got)
@@ -80,6 +79,7 @@ func TestMetricMapper_Map(t *testing.T) {
 						{
 							Label: []*dto.LabelPair{
 								newLabelPair("label1", "value1"),
+								newLabelPair("label2", "value2"),
 							},
 							Gauge: newGauge(1.0),
 						},
@@ -89,17 +89,17 @@ func TestMetricMapper_Map(t *testing.T) {
 		}
 
 		got := mapper.Map(metricFamilyMaps)
-		expected := &pb.MetricsBatch{
-			Metrics: []*pb.Metric{
-				{
-					Name: exporter.MetricGraphicsEngineActive,
-					Measurements: []*pb.Metric_Measurement{
-						{
-							Value: 1.0,
-							Labels: []*pb.Metric_Label{
-								{Name: "label1", Value: "value1"},
-							},
+		expected := &exporter.MetricsBatch{
+			Metrics: map[string]exporter.MeasurementsByLabelKey{
+				exporter.MetricGraphicsEngineActive: {
+					"label1=value1;label2=value2": {
+						Value:      1.0,
+						NumSamples: 1,
+						Labels: map[string]string{
+							"label1": "value1",
+							"label2": "value2",
 						},
+						LabelsKey: "label1=value1;label2=value2",
 					},
 				},
 			},
