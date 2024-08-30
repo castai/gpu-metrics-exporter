@@ -10,11 +10,6 @@ import (
 type MetricName = string
 
 const (
-	MetricNameGPUGraphicsEngineActive  = "gpu_graphic_engine_active"
-	MetricNameGPUFrameBufferUsedBytes  = "gpu_framebuffer_used_bytes"
-	MetricNameGPUFrameBufferFreeBytes  = "gpu_framebuffer_free_bytes"
-	MetricNameGPUFrameBufferTotalBytes = "gpu_framebuffer_total_bytes"
-
 	MetricStreamingMultiProcessorActive       = MetricName("DCGM_FI_PROF_SM_ACTIVE")
 	MetricStreamingMultiProcessorOccupancy    = MetricName("DCGM_FI_PROF_SM_OCCUPANCY")
 	MetricStreamingMultiProcessorTensorActive = MetricName("DCGM_FI_PROF_PIPE_TENSOR_ACTIVE")
@@ -40,17 +35,25 @@ const (
 
 var (
 	EnabledMetrics = map[MetricName]struct{}{
-		MetricGraphicsEngineActive:             {},
-		MetricFrameBufferTotal:                 {},
-		MetricFrameBufferFree:                  {},
-		MetricFrameBufferUsed:                  {},
-		MetricStreamingMultiProcessorActive:    {},
-		MetricStreamingMultiProcessorOccupancy: {},
-		MetricDRAMActive:                       {},
-		MetricIntPipeActive:                    {},
-		MetricFloat16PipeActive:                {},
-		MetricFloat32PipeActive:                {},
-		MetricFloat64PipeActive:                {},
+		MetricStreamingMultiProcessorActive:       {},
+		MetricStreamingMultiProcessorOccupancy:    {},
+		MetricStreamingMultiProcessorTensorActive: {},
+		MetricDRAMActive:                          {},
+		MetricPCIeTXBytes:                         {},
+		MetricPCIeRXBytes:                         {},
+		MetricGraphicsEngineActive:                {},
+		MetricFrameBufferTotal:                    {},
+		MetricFrameBufferFree:                     {},
+		MetricFrameBufferUsed:                     {},
+		MetricPCIeLinkGen:                         {},
+		MetricPCIeLinkWidth:                       {},
+		MetricGPUTemperature:                      {},
+		MetricMemoryTemperature:                   {},
+		MetricPowerUsage:                          {},
+		MetricIntPipeActive:                       {},
+		MetricFloat16PipeActive:                   {},
+		MetricFloat32PipeActive:                   {},
+		MetricFloat64PipeActive:                   {},
 	}
 )
 

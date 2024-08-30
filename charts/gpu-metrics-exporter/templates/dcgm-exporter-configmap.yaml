@@ -6,14 +6,14 @@ metadata:
 data:
   counters.csv: |
     # Temperature and power usage,,
-    # DCGM_FI_DEV_GPU_TEMP, gauge, Current temperature readings for the device in degrees C.
-    # DCGM_FI_DEV_MEMORY_TEMP, gauge, Memory temperature for the device.
-    # DCGM_FI_DEV_POWER_USAGE, gauge, Power usage for the device in Watts.
+    DCGM_FI_DEV_GPU_TEMP, gauge, Current temperature readings for the device in degrees C.
+    DCGM_FI_DEV_MEMORY_TEMP, gauge, Memory temperature for the device.
+    DCGM_FI_DEV_POWER_USAGE, gauge, Power usage for the device in Watts.
 
     # Utilization,,
     DCGM_FI_PROF_SM_ACTIVE, gauge, The ratio of cycles an SM has at least 1 warp assigned
     DCGM_FI_PROF_SM_OCCUPANCY, gauge, The fraction of resident warps on a multiprocessor
-    # DCGM_FI_PROF_PIPE_TENSOR_ACTIVE, gauge, The ratio of cycles the tensor (HMMA) pipe is active (off the peak sustained elapsed cycles)
+    DCGM_FI_PROF_PIPE_TENSOR_ACTIVE, gauge, The ratio of cycles the tensor (HMMA) pipe is active (off the peak sustained elapsed cycles)
     DCGM_FI_PROF_GR_ENGINE_ACTIVE, gauge, Ratio of time the graphics engine is active (in %).
     DCGM_FI_PROF_DRAM_ACTIVE, gauge, The ratio of cycles the device memory interface is active sending or receiving data.
 
@@ -23,10 +23,10 @@ data:
     DCGM_FI_DEV_FB_TOTAL, gauge, Total Frame Buffer of the GPU in MB.
 
     # PCIE,,
-    # DCGM_FI_PROF_PCIE_TX_BYTES, gauge, Total number of bytes transmitted through PCIe TX
-    # DCGM_FI_PROF_PCIE_RX_BYTES, gauge, Total number of bytes received through PCIe RX
-    # DCGM_FI_DEV_PCIE_LINK_GEN, gauge, PCIe Current Link Generation.
-    # DCGM_FI_DEV_PCIE_LINK_WIDTH, gauge, PCIe Current Link Width.
+    DCGM_FI_PROF_PCIE_TX_BYTES, gauge, Total number of bytes transmitted through PCIe TX
+    DCGM_FI_PROF_PCIE_RX_BYTES, gauge, Total number of bytes received through PCIe RX
+    DCGM_FI_DEV_PCIE_LINK_GEN, gauge, PCIe Current Link Generation.
+    DCGM_FI_DEV_PCIE_LINK_WIDTH, gauge, PCIe Current Link Width.
 
     # Pipelines,,
     DCGM_FI_PROF_PIPE_INT_ACTIVE, gauge, Ratio of cycles the integer pipe is active.
