@@ -222,6 +222,11 @@ func TestMetricBatchToProto(t *testing.T) {
 			}
 			return 1
 		})
+		for _, measurement := range metric.Measurements {
+			slices.SortFunc(measurement.Labels, func(i, j *pb.Metric_Label) int {
+				return strings.Compare(i.Name, j.Name)
+			})
+		}
 	}
 	r.Equal(expectedProto, gotProto)
 }

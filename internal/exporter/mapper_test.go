@@ -29,7 +29,7 @@ func TestMetricMapper_Map(t *testing.T) {
 		var metricFamilyMaps []exporter.MetricFamilyMap
 
 		got := mapper.Map(metricFamilyMaps)
-		expected := &exporter.MetricsBatch{}
+		expected := exporter.NewMetricsBatch()
 
 		r := require.New(t)
 		r.Equal(expected, got)
@@ -53,7 +53,7 @@ func TestMetricMapper_Map(t *testing.T) {
 		}
 
 		got := mapper.Map(metricFamilyMaps)
-		expected := &exporter.MetricsBatch{}
+		expected := exporter.NewMetricsBatch()
 
 		r := require.New(t)
 		r.Equal(expected, got)
