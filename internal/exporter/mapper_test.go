@@ -24,7 +24,7 @@ func newLabelPair(name, value string) *dto.LabelPair {
 }
 
 func TestMetricMapper_Map(t *testing.T) {
-	mapper := exporter.NewMapper()
+	mapper := exporter.NewMapper("test-node-name")
 
 	t.Run("empty input yields empty MetricsBatch", func(t *testing.T) {
 		metricFamilyMaps := []exporter.MetricFamilyMap{}

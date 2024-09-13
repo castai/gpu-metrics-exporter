@@ -87,7 +87,7 @@ func run(cfg *config.Config, log logrus.FieldLogger) error {
 
 	client := setupCastAIClient(log, cfg)
 	scraper := exporter.NewScraper(&http.Client{}, log)
-	mapper := exporter.NewMapper()
+	mapper := exporter.NewMapper(cfg.NodeName)
 	ex := exporter.NewExporter(exporter.Config{
 		ExportInterval:   cfg.ExportInterval,
 		Selector:         labelSelector.String(),
@@ -95,6 +95,7 @@ func run(cfg *config.Config, log logrus.FieldLogger) error {
 		DCGMExporterPath: cfg.DCGMMetricsEndpoint,
 		DCGMExporterHost: cfg.DCGMHost,
 		Enabled:          true,
+		NodeName:         cfg.NodeName,
 	}, clientset, log, scraper, mapper, client)
 
 	go func() {

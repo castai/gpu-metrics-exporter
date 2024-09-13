@@ -27,6 +27,7 @@ type Config struct {
 	DCGMExporterHost string
 	Selector         string
 	Enabled          bool
+	NodeName         string
 }
 
 type exporter struct {
@@ -100,11 +101,16 @@ func (e *exporter) getDCGMUrls(ctx context.Context) ([]string, error) {
 		}, nil
 	}
 
+	fieldSelector := "status.phase=Running"
+	if e.cfg.NodeName != "" {
+		fieldSelector = fmt.Sprintf("%s,spec.nodeName=%s", fieldSelector, e.cfg.NodeName)
+	}
+
 	// TODO: consider using an informer and keeping a list of pods which match the selector
 	// at the moment seems like an overkill
 	dcgmExporterList, err := e.kube.CoreV1().Pods("").List(ctx, metav1.ListOptions{
 		LabelSelector: e.cfg.Selector,
-		FieldSelector: "status.phase=Running",
+		FieldSelector: fieldSelector,
 	})
 	if err != nil {
 		return []string{}, fmt.Errorf("error getting DCGM exporter pods %w", err)
