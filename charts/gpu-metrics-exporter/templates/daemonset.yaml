@@ -78,6 +78,10 @@ spec:
           env:
             - name: "DCGM_HOST"
               value: "localhost"
+            - name: "NODE_NAME"
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
             - name: "API_KEY"
               valueFrom:
                   secretKeyRef:
