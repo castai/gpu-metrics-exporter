@@ -31,6 +31,12 @@ jobs:
         with:
           go-version: 1.22
 
+      - id: govulncheck
+        uses: golang/govulncheck-action@v1
+        with:
+           go-version-file: go.mod
+           go-package: ./...
+
       - name: Get release tag
         if: github.event_name == 'release'
         run: echo "RELEASE_TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
