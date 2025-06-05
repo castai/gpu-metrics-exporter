@@ -28,9 +28,10 @@ gpuMetricsExporter:
     runAsNonRoot: true
   port: 6061
   tolerations:
-    - key: "nvidia.com/gpu"
-      value: "true"
-      effect: "NoSchedule"
+    - effect: "NoExecute"
+      operator: "Exists"
+    - effect: "NoExecute"
+      operator: "Exists"
 
 dcgmExporter:
   enabled: true
