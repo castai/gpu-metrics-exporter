@@ -9,6 +9,7 @@ serviceAccount:
 castai:
   apiKey: ""
   clusterId: ""
+  apiUrl: ""
 
 gpuMetricsExporter:
   image:
@@ -32,6 +33,8 @@ gpuMetricsExporter:
       operator: "Exists"
     - effect: "NoExecute"
       operator: "Exists"
+  rbac:
+    clusterWide: true
 
 dcgmExporter:
   enabled: true
