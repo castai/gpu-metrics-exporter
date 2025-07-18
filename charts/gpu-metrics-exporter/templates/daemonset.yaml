@@ -52,6 +52,11 @@ spec:
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- else if eq .Values.provider "eks"}}
+      {{- with .Values.eks.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- end}}
       {{- with .Values.gpuMetricsExporter.tolerations }}
       tolerations:

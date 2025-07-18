@@ -1,10 +1,10 @@
-provider: "" # gke | eks | aks
-imagePullSecrets: []
+provider: "eks" # gke | eks | aks
+imagePullSecrets: [ ]
 
 serviceAccount:
   create: true
   automount: true
-  annotations: {}
+  annotations: { }
 
 castai:
   apiKey: ""
@@ -15,7 +15,7 @@ gpuMetricsExporter:
     repository: ghcr.io/castai/gpu-metrics-exporter/gpu-metrics-exporter
     pullPolicy: IfNotPresent
     tag: ""
-  config: {}
+  config: { }
   resources:
     limits:
       cpu: 100m
@@ -49,6 +49,16 @@ gke:
           - matchExpressions:
               - key: cloud.google.com/gke-accelerator
                 operator: Exists
+
+eks:
+  affinity:
+    nodeAffinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: nvidia.com/gpu
+                  operator: Exists
 
 migrate:
   image:
