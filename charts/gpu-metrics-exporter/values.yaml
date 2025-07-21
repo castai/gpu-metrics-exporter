@@ -11,6 +11,7 @@ castai:
   clusterId: ""
 
 gpuMetricsExporter:
+  affinity:
   image:
     repository: ghcr.io/castai/gpu-metrics-exporter/gpu-metrics-exporter
     pullPolicy: IfNotPresent
@@ -49,16 +50,6 @@ gke:
           - matchExpressions:
               - key: cloud.google.com/gke-accelerator
                 operator: Exists
-
-eks:
-  affinity:
-    nodeAffinity:
-      nodeAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          nodeSelectorTerms:
-            - matchExpressions:
-                - key: nvidia.com/gpu
-                  operator: Exists
 
 migrate:
   image:
