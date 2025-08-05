@@ -1,4 +1,4 @@
-provider: "" # gke | eks | aks
+provider: "gke" # gke | eks | aks
 imagePullSecrets: [ ]
 
 serviceAccount:
@@ -8,6 +8,7 @@ serviceAccount:
 
 castai:
   apiKey: ""
+  apiKeySecretRef: ""
   clusterId: ""
   apiUrl: ""
 
