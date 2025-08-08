@@ -20,4 +20,3 @@ data:
 {{- if $otherConfig }}
   {{- toYaml $otherConfig | nindent 2 }}
 {{- end }}
-
