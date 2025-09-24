@@ -25,7 +25,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if eq (required ".Values.provider is required (gke|eks|aks)" .Values.provider) "eks" }}
+      {{- if eq (required ".Values.provider is required (gke|eks|aks|omni)" .Values.provider) "eks" }}
       priorityClassName: system-node-critical
       {{- end }}
       serviceAccountName: {{ include "gpu-metrics-exporter.serviceAccountName" . }}
