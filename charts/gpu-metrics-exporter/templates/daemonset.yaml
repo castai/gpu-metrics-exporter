@@ -88,6 +88,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+           {{- if or .Values.castai.apiKey .Values.castai.apiKeySecretRef }}
             - name: "API_KEY"
               valueFrom:
                 secretKeyRef:
@@ -97,6 +98,9 @@ spec:
                   name: {{ include "gpu-metrics-exporter.fullname" . }}
                   {{- end}}
                   key: API_KEY
+            {{ else }}
+              {{- fail "one of apiKey or apiKeySecretRef should be set" }}
+            {{- end }}
           {{- if .Values.dcgmExporter.enabled }}
             - name: "DCGM_HOST"
               value: "localhost"
