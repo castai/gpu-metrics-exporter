@@ -50,7 +50,7 @@ $ helm install --generate-name <deployment-name> -f values.yaml -f values-<k8s-p
 ```
 Where:
 * `<deployment-name>` is a name of your choice
-* `<k8s-provider>` is the name of the k8s provider you are using (e.g. `eks`, `gke`, `aks`)
+* `<k8s-provider>` is the name of the k8s provider you are using (e.g. `eks`, `gke`, `aks`, 'omni')
    * this sets the proper node affinity so the Daemon Set only runs on nodes with GPUs
 #### Adding the cast.ai repository
 
@@ -61,7 +61,7 @@ $ helm repo add castai https://castai.github.io/charts
 $ helm repo update
 $ helm pull castai/gpu-metrics-exporter --untar
 $ cd gpu-metrics-exporter
-$ helm install --generate-name castai/gpu-metrics-exporter -f values.yaml -f values-<k8s-provider>.yaml
+$ helm install --generate-name castai/gpu-metrics-exporter -f values.yaml
 ```
 #### Configuring the installation
 
