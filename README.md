@@ -46,12 +46,10 @@ DCGM_FI_DEV_POWER_USAGE
 You can clone this repository and install the chart with the following commands:
 ```bash
 $ cd charts/gpu-metrics-exporter
-$ helm install --generate-name <deployment-name> -f values.yaml -f values-<k8s-provider>.yaml .
+$ helm install --generate-name <deployment-name> -f values.yaml .
 ```
 Where:
 * `<deployment-name>` is a name of your choice
-* `<k8s-provider>` is the name of the k8s provider you are using (e.g. `eks`, `gke`, `aks`, 'omni')
-   * this sets the proper node affinity so the Daemon Set only runs on nodes with GPUs
 #### Adding the cast.ai repository
 
 You can add the cast.ai repository and install the chart with the following commands:
