@@ -18,6 +18,7 @@ const (
 	MetricGPUTemperature                      = MetricName("DCGM_FI_DEV_GPU_TEMP")
 	MetricMemoryTemperature                   = MetricName("DCGM_FI_DEV_MEMORY_TEMP")
 	MetricPowerUsage                          = MetricName("DCGM_FI_DEV_POWER_USAGE")
+	MetricGPUUtilization                      = MetricName("DCGM_FI_DEV_GPU_UTIL")
 	MetricIntPipeActive                       = MetricName("DCGM_FI_PROF_PIPE_INT_ACTIVE")
 	MetricFloat16PipeActive                   = MetricName("DCGM_FI_PROF_PIPE_FP16_ACTIVE")
 	MetricFloat32PipeActive                   = MetricName("DCGM_FI_PROF_PIPE_FP32_ACTIVE")
@@ -41,6 +42,7 @@ var (
 		MetricGPUTemperature:                      {},
 		MetricMemoryTemperature:                   {},
 		MetricPowerUsage:                          {},
+		MetricGPUUtilization:                      {},
 		MetricIntPipeActive:                       {},
 		MetricFloat16PipeActive:                   {},
 		MetricFloat32PipeActive:                   {},
