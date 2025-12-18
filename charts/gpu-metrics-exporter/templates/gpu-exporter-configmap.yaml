@@ -5,7 +5,7 @@ metadata:
 data:
 {{- if not .Values.castai.clusterIdSecretRef }}
   CLUSTER_ID: {{ required "castai.clusterId must be provided" .Values.castai.clusterId | quote }}
-  {{- end }}
+{{- end }}
   CAST_API: {{ required "castai.apiUrl must be provided" .Values.castai.apiUrl | quote }}
 
 {{- $config := .Values.gpuMetricsExporter.config | default dict }}
