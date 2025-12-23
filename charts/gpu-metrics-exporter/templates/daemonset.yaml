@@ -13,6 +13,8 @@ metadata:
     ignore-check.kube-linter.io/no-read-only-root-fs: "This daemon set needs to run DCGM Exporter with read-only root filesystem."
   {{- end }}
 spec:
+  updateStrategy:
+    {{- .Values.updateStrategy | toYaml | nindent 4 }}
   selector:
     matchLabels:
       {{- include "gpu-metrics-exporter.selectorLabels" . | nindent 6 }}
