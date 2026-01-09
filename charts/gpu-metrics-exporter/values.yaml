@@ -17,6 +17,9 @@ castai:
   
   # CASTAI Cluster unique identifier.
   clusterId: ""
+
+  # The referenced secret must provide the name of the secret having clusterID
+  clusterIdSecretRef: 
   
   # CASTAI public api url.
   apiUrl: "https://api.cast.ai"
