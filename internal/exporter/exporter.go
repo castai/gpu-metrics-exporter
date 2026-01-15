@@ -152,7 +152,7 @@ func (e *exporter) export(ctx context.Context) error {
 	}
 
 	if err := e.client.UploadBatch(ctx, batch); err != nil {
-		return fmt.Errorf("error whlie sending %d metrics to castai %w", len(batch.Metrics), err)
+		return fmt.Errorf("error while sending %d metrics to castai %w", len(batch.Metrics), err)
 	}
 
 	e.log.Infof("successfully exported %d metrics", len(batch.Metrics))
