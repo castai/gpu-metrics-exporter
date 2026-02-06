@@ -9,8 +9,9 @@ import (
 
 	dto "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
+
+	"github.com/castai/logging"
 )
 
 const (
@@ -36,10 +37,10 @@ type result struct {
 type scraper struct {
 	httpClient HTTPClient
 	parser     expfmt.TextParser
-	log        logrus.FieldLogger
+	log        *logging.Logger
 }
 
-func NewScraper(httpClient HTTPClient, log logrus.FieldLogger) Scraper {
+func NewScraper(httpClient HTTPClient, log *logging.Logger) Scraper {
 	return &scraper{
 		httpClient: httpClient,
 		log:        log,
@@ -81,7 +82,7 @@ func (s scraper) Scrape(ctx context.Context, urls []string) ([]MetricFamilyMap, 
 	metrics := make([]MetricFamilyMap, 0, len(urls))
 	for result := range resultsChan {
 		if result.err != nil {
-			s.log.Error(result.err)
+			s.log.WithField("error", result.err.Error()).Error("failed to scrape metrics")
 			continue
 		}
 		metrics = append(metrics, result.metricFamilyMap)

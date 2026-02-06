@@ -9,6 +9,8 @@ const (
 	MetricDRAMActive                          = MetricName("DCGM_FI_PROF_DRAM_ACTIVE")
 	MetricPCIeTXBytes                         = MetricName("DCGM_FI_PROF_PCIE_TX_BYTES")
 	MetricPCIeRXBytes                         = MetricName("DCGM_FI_PROF_PCIE_RX_BYTES")
+	MetricNVLinkTXBytes                       = MetricName("DCGM_FI_PROF_NVLINK_TX_BYTES")
+	MetricNVLinkRXBytes                       = MetricName("DCGM_FI_PROF_NVLINK_RX_BYTES")
 	MetricGraphicsEngineActive                = MetricName("DCGM_FI_PROF_GR_ENGINE_ACTIVE")
 	MetricFrameBufferTotal                    = MetricName("DCGM_FI_DEV_FB_TOTAL")
 	MetricFrameBufferFree                     = MetricName("DCGM_FI_DEV_FB_FREE")
@@ -23,6 +25,10 @@ const (
 	MetricFloat16PipeActive                   = MetricName("DCGM_FI_PROF_PIPE_FP16_ACTIVE")
 	MetricFloat32PipeActive                   = MetricName("DCGM_FI_PROF_PIPE_FP32_ACTIVE")
 	MetricFloat64PipeActive                   = MetricName("DCGM_FI_PROF_PIPE_FP64_ACTIVE")
+	MetricClocksEventReasons                  = MetricName("DCGM_FI_DEV_CLOCKS_EVENT_REASONS")
+	MetricXIDErrors                           = MetricName("DCGM_FI_DEV_XID_ERRORS")
+	MetricPowerViolation                      = MetricName("DCGM_FI_DEV_POWER_VIOLATION")
+	MetricThermalViolation                    = MetricName("DCGM_FI_DEV_THERMAL_VIOLATION")
 )
 
 var (
@@ -33,6 +39,8 @@ var (
 		MetricDRAMActive:                          {},
 		MetricPCIeTXBytes:                         {},
 		MetricPCIeRXBytes:                         {},
+		MetricNVLinkTXBytes:                       {},
+		MetricNVLinkRXBytes:                       {},
 		MetricGraphicsEngineActive:                {},
 		MetricFrameBufferTotal:                    {},
 		MetricFrameBufferFree:                     {},
@@ -47,5 +55,9 @@ var (
 		MetricFloat16PipeActive:                   {},
 		MetricFloat32PipeActive:                   {},
 		MetricFloat64PipeActive:                   {},
+		MetricClocksEventReasons:                  {},
+		MetricXIDErrors:                           {},
+		MetricPowerViolation:                      {},
+		MetricThermalViolation:                    {},
 	}
 )

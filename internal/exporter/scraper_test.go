@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	"github.com/castai/gpu-metrics-exporter/internal/exporter"
 	mocks "github.com/castai/gpu-metrics-exporter/mock/exporter"
+	"github.com/castai/logging"
 )
 
 var (
@@ -25,7 +25,7 @@ var (
 )
 
 func TestScraper_Scrape(t *testing.T) {
-	log := logrus.New()
+	log := logging.New(logging.NewTextHandler(logging.TextHandlerConfig{}))
 
 	t.Run("scrapes metrics without error", func(t *testing.T) {
 		httpClient := mocks.NewMockHTTPClient(t)
