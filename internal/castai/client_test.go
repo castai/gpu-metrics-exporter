@@ -7,15 +7,15 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/jarcoal/httpmock"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 
 	"github.com/castai/gpu-metrics-exporter/internal/castai"
 	"github.com/castai/gpu-metrics-exporter/pb"
+	"github.com/castai/logging"
 )
 
 func Test_UploadBatch(t *testing.T) {
-	log := logrus.New()
+	log := logging.New(logging.NewTextHandler(logging.TextHandlerConfig{}))
 	restyClient := resty.New()
 	client := castai.NewClient(castai.Config{
 		URL:       "http://localhost",

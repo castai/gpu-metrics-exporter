@@ -7,7 +7,9 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/castai/gpu-metrics-exporter/internal/exporter"
+	workload_mock "github.com/castai/gpu-metrics-exporter/mock/workload"
 	"github.com/castai/gpu-metrics-exporter/pb"
+	"github.com/castai/logging"
 )
 
 func newGauge(value float64) *dto.Gauge {
@@ -24,7 +26,9 @@ func newLabelPair(name, value string) *dto.LabelPair {
 }
 
 func TestMetricMapper_Map(t *testing.T) {
-	mapper := exporter.NewMapper("test-node-name")
+	log := logging.New(logging.NewTextHandler(logging.TextHandlerConfig{}))
+	resolver := workload_mock.NewMockResolver(t)
+	mapper := exporter.NewMapper("test-node-name", resolver, log)
 
 	t.Run("empty input yields empty MetricsBatch", func(t *testing.T) {
 		metricFamilyMaps := []exporter.MetricFamilyMap{}

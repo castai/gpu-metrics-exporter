@@ -3,15 +3,13 @@ package server
 import (
 	"net/http"
 	"net/http/pprof"
-
-	"github.com/sirupsen/logrus"
 )
 
 func healthHandler(w http.ResponseWriter, req *http.Request) {
 	_, _ = w.Write([]byte("Ok"))
 }
 
-func NewServerMux(log logrus.FieldLogger) *http.ServeMux {
+func NewServerMux() *http.ServeMux {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/debug/pprof/", pprof.Index)

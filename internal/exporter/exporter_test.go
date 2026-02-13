@@ -7,27 +7,30 @@ import (
 	"time"
 
 	dto "github.com/prometheus/client_model/go"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes/fake"
+	"k8s.io/apimachinery/pkg/runtime"
+	fakedynamic "k8s.io/client-go/dynamic/fake"
 
 	"github.com/castai/gpu-metrics-exporter/internal/exporter"
 	castai_mock "github.com/castai/gpu-metrics-exporter/mock/castai"
 	mocks "github.com/castai/gpu-metrics-exporter/mock/exporter"
 	"github.com/castai/gpu-metrics-exporter/pb"
+	"github.com/castai/logging"
 )
 
 func TestExporter_Running(t *testing.T) {
-	log := logrus.New()
+	log := logging.New(logging.NewTextHandler(logging.TextHandlerConfig{}))
 
 	t.Run("discovers pods with labels and scrapes them", func(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		kubeClient := fake.NewSimpleClientset(&corev1.Pod{
+		scheme := runtime.NewScheme()
+		_ = corev1.AddToScheme(scheme)
+		dynClient := fakedynamic.NewSimpleDynamicClient(scheme, &corev1.Pod{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "dcgm-exporter",
 				Namespace: "default",
@@ -51,7 +54,7 @@ func TestExporter_Running(t *testing.T) {
 		mapper := mocks.NewMockMetricMapper(t)
 		client := castai_mock.NewMockClient(t)
 
-		ex := exporter.NewExporter(config, kubeClient, log, scraper, mapper, client)
+		ex := exporter.NewExporter(config, dynClient, log, scraper, mapper, client, nil)
 		ex.Enable()
 
 		metricFamilies := []exporter.MetricFamilyMap{
@@ -110,7 +113,9 @@ func TestExporter_Running(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		kubeClient := fake.NewSimpleClientset()
+		scheme := runtime.NewScheme()
+		_ = corev1.AddToScheme(scheme)
+		dynClient := fakedynamic.NewSimpleDynamicClient(scheme)
 
 		config := exporter.Config{
 			ExportInterval:   2 * time.Second,
@@ -124,7 +129,7 @@ func TestExporter_Running(t *testing.T) {
 		mapper := mocks.NewMockMetricMapper(t)
 		client := castai_mock.NewMockClient(t)
 
-		ex := exporter.NewExporter(config, kubeClient, log, scraper, mapper, client)
+		ex := exporter.NewExporter(config, dynClient, log, scraper, mapper, client, nil)
 		ex.Enable()
 
 		metricFamilies := []exporter.MetricFamilyMap{
@@ -183,7 +188,9 @@ func TestExporter_Running(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		kubeClient := fake.NewSimpleClientset()
+		scheme := runtime.NewScheme()
+		_ = corev1.AddToScheme(scheme)
+		dynClient := fakedynamic.NewSimpleDynamicClient(scheme)
 
 		config := exporter.Config{
 			ExportInterval:   2 * time.Second,
@@ -197,7 +204,7 @@ func TestExporter_Running(t *testing.T) {
 		mapper := mocks.NewMockMetricMapper(t)
 		client := castai_mock.NewMockClient(t)
 
-		ex := exporter.NewExporter(config, kubeClient, log, scraper, mapper, client)
+		ex := exporter.NewExporter(config, dynClient, log, scraper, mapper, client, nil)
 		ex.Enable()
 
 		metricFamilies := []exporter.MetricFamilyMap{

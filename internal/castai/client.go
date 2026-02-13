@@ -9,11 +9,11 @@ import (
 	"time"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
 	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/castai/gpu-metrics-exporter/pb"
+	"github.com/castai/logging"
 )
 
 const (
@@ -52,10 +52,10 @@ type Client interface {
 type client struct {
 	restyClient *resty.Client
 	cfg         Config
-	log         logrus.FieldLogger
+	log         *logging.Logger
 }
 
-func NewClient(cfg Config, log logrus.FieldLogger, restyClient *resty.Client, version string) Client {
+func NewClient(cfg Config, log *logging.Logger, restyClient *resty.Client, version string) Client {
 	restyClient.BaseURL = cfg.URL
 	restyClient.SetHeaders(map[string]string{
 		tokenHeader:           cfg.APIKey,
@@ -84,7 +84,7 @@ func (c client) UploadBatch(ctx context.Context, batch *pb.MetricsBatch) error {
 			Post(fmt.Sprintf("/v1/kubernetes/clusters/%s/gpu-metrics", c.cfg.ClusterID))
 
 		if err != nil {
-			c.log.Errorf("error making http request %v", err)
+			c.log.WithField("error", err.Error()).Error("error making http request")
 			return false, nil
 		}
 

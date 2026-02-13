@@ -1,12 +1,18 @@
-with-expecter: true
-dir: 'mock/{{replace .InterfaceDirRelative "internal" "" 1}}'
+dir: mock/{{.InterfaceDirRelative | replace "internal" "" 1}}
+filename: "mock_{{.InterfaceName | lower}}.go"
+template: testify
+template-data:
+  unroll-variadic: true
 packages:
   "github.com/castai/gpu-metrics-exporter/internal/exporter":
     interfaces:
-      Exporter:
-      Scraper:
-      MetricMapper:
-      HttpClient:
+      Exporter: {}
+      Scraper: {}
+      MetricMapper: {}
+      HTTPClient: {}
+  "github.com/castai/gpu-metrics-exporter/internal/workload":
+    interfaces:
+      Resolver: {}
   "github.com/castai/gpu-metrics-exporter/internal/castai":
     interfaces:
-      Client:
+      Client: {}

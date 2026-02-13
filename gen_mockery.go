@@ -1,2 +1,2 @@
-//go:generate go run github.com/vektra/mockery/v2@v2.42.0 --all
+//go:generate go run github.com/vektra/mockery/v3@v3.5.3
 package mockery
