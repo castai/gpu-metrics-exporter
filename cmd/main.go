@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,7 +15,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
-	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/flowcontrol"
 
@@ -22,12 +23,20 @@ import (
 	"github.com/castai/gpu-metrics-exporter/internal/config"
 	"github.com/castai/gpu-metrics-exporter/internal/exporter"
 	"github.com/castai/gpu-metrics-exporter/internal/server"
+	"github.com/castai/gpu-metrics-exporter/internal/workload"
+	"github.com/castai/logging"
+	"github.com/castai/metrics"
 )
 
 var (
 	GitCommit = "undefined"
 	GitRef    = "no-ref"
 	Version   = "local"
+)
+
+const (
+	workloadCacheSize = 512
+	workloadsLabelKey = "workloads.cast.ai/custom-workload"
 )
 
 func main() {
@@ -38,19 +47,30 @@ func main() {
 		log.Fatal(err)
 	}
 
-	logLevel, err := logrus.ParseLevel(cfg.LogLevel)
+	logLevel, err := parseLogLevel(cfg.LogLevel)
 	if err != nil {
-		log.Fatal(err)
+		log.Warnf("failed to parse log level, defaulting to 'info': %v", err)
+		logLevel = slog.LevelInfo
 	}
-	log.SetLevel(logLevel)
 
-	if err := run(cfg, log); err != nil && !errors.Is(err, context.Canceled) {
+	castaiLogger := logging.New(logging.NewTextHandler(logging.TextHandlerConfig{
+		Output: os.Stdout,
+		Level:  logLevel,
+	}))
+
+	if err := run(cfg, castaiLogger); err != nil && !errors.Is(err, context.Canceled) {
 		log.Fatal(err)
 	}
 }
 
-func run(cfg *config.Config, log logrus.FieldLogger) error {
-	mux := server.NewServerMux(log)
+func parseLogLevel(level string) (slog.Level, error) {
+	var lvl slog.Level
+	err := lvl.UnmarshalText([]byte(level))
+	return lvl, err
+}
+
+func run(cfg *config.Config, log *logging.Logger) error {
+	mux := server.NewServerMux()
 
 	srv := &http.Server{
 		Addr:              fmt.Sprintf(":%d", cfg.HTTPListenPort),
@@ -75,19 +95,45 @@ func run(cfg *config.Config, log logrus.FieldLogger) error {
 		cancel()
 	}()
 
-	clientset, err := newKubernetesClientset(cfg)
+	dynClient, err := newDynamicClient(cfg)
 	if err != nil {
-		log.Fatal(err)
+		log.WithField("error", err.Error()).Fatal("failed to create kubernetes dynamic client")
 	}
 
 	labelSelector, err := selectorFromMap(cfg.DCGMLabels)
 	if err != nil {
-		log.Fatal(err)
+		log.WithField("error", err.Error()).Fatal("failed to create get label selector")
+	}
+
+	metricClient, err := metrics.NewMetricClient(
+		metrics.Config{
+			APIAddr:   cfg.TelemetryURL,
+			APIToken:  cfg.APIKey,
+			ClusterID: cfg.ClusterID,
+		}, log)
+	if err != nil {
+		log.WithField("error", err.Error()).Warn("failed to create metrics client")
+	}
+
+	if metricClient != nil {
+		go func() {
+			if err := metricClient.Start(ctx); err != nil && !errors.Is(err, context.Canceled) {
+				log.WithField("error", err.Error()).Error("error in metrics client")
+			}
+		}()
 	}
 
 	client := setupCastAIClient(log, cfg)
 	scraper := exporter.NewScraper(&http.Client{}, log)
-	mapper := exporter.NewMapper(cfg.NodeName)
+	workloadResolver, err := workload.NewResolver(dynClient, workload.Config{
+		LabelKeys: []string{workloadsLabelKey},
+		CacheSize: workloadCacheSize,
+	})
+	if err != nil {
+		log.WithField("error", err.Error()).Fatal("failed to create workload resolver")
+	}
+
+	mapper := exporter.NewMapper(cfg.NodeName, workloadResolver, log)
 	ex := exporter.NewExporter(exporter.Config{
 		ExportInterval:   cfg.ExportInterval,
 		Selector:         labelSelector.String(),
@@ -96,7 +142,7 @@ func run(cfg *config.Config, log logrus.FieldLogger) error {
 		DCGMExporterHost: cfg.DCGMHost,
 		Enabled:          true,
 		NodeName:         cfg.NodeName,
-	}, clientset, log, scraper, mapper, client)
+	}, dynClient, log, scraper, mapper, client, metricClient)
 
 	go func() {
 		if err := ex.Start(ctx); err != nil && !errors.Is(err, context.Canceled) {
@@ -108,19 +154,14 @@ func run(cfg *config.Config, log logrus.FieldLogger) error {
 	return srv.ListenAndServe()
 }
 
-func newKubernetesClientset(cfg *config.Config) (*kubernetes.Clientset, error) {
-	config, err := clientcmd.BuildConfigFromFlags("", cfg.KubeConfigPath)
+func newDynamicClient(cfg *config.Config) (dynamic.Interface, error) {
+	restConfig, err := clientcmd.BuildConfigFromFlags("", cfg.KubeConfigPath)
 	if err != nil {
 		return nil, err
 	}
-	config.RateLimiter = flowcontrol.NewTokenBucketRateLimiter(float32(10), 25)
+	restConfig.RateLimiter = flowcontrol.NewTokenBucketRateLimiter(float32(10), 25)
 
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-
-	return clientset, nil
+	return dynamic.NewForConfig(restConfig)
 }
 
 func selectorFromMap(labelMap map[string]string) (labels.Selector, error) {
@@ -138,7 +179,7 @@ func selectorFromMap(labelMap map[string]string) (labels.Selector, error) {
 	return selector.Add(requirements...), nil
 }
 
-func setupCastAIClient(log logrus.FieldLogger, cfg *config.Config) castai.Client {
+func setupCastAIClient(log *logging.Logger, cfg *config.Config) castai.Client {
 	clientConfig := castai.Config{
 		ClusterID: cfg.ClusterID,
 		APIKey:    cfg.APIKey,
