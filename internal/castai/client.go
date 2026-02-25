@@ -41,7 +41,7 @@ var (
 
 type Config struct {
 	URL       string
-	APIKey    string
+	APIKey    string // nolint:gosec // G117: false positive
 	ClusterID string
 }
 

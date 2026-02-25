@@ -21,7 +21,7 @@ type Config struct {
 	ExportInterval      time.Duration     `envconfig:"EXPORT_INTERVAL" default:"15s"`
 	CastAPI             string            `envconfig:"CAST_API" default:"https://api.cast.ai"`
 	ClusterID           string            `envconfig:"CLUSTER_ID"`
-	APIKey              string            `envconfig:"API_KEY"`
+	APIKey              string            `envconfig:"API_KEY"` // nolint:gosec // G117: false positive
 	TelemetryURL        string            `envconfig:"TELEMETRY_URL" default:""`
 }
 
