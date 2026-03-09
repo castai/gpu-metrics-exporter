@@ -27,9 +27,8 @@ tests:
                 name: castai-agent-metadata
                 key: CLUSTER_ID
 
-  - it: No gpu-metrics-exporter Secret contains the API key (apiKeySecretRef is used instead)
+  - it: No gpu-metrics-exporter Secret is rendered (apiKeySecretRef is used instead)
     template: secret.yaml
     asserts:
-      - notEqual:
-          path: data.API_KEY
-          value: "bXlrZXk="
+      - hasDocuments:
+          count: 0

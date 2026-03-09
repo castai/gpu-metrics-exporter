@@ -30,7 +30,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- $provider := include "gpu-metrics-exporter.provider" . }}
-      {{- if eq (required ".Values.provider is required (gke|eks|aks|omni)" $provider) "eks" }}
+      {{- if eq (required "provider or global.castai.provider is required (gke|eks|aks|omni)" $provider) "eks" }}
       priorityClassName: system-node-critical
       {{- end }}
       serviceAccountName: {{ include "gpu-metrics-exporter.serviceAccountName" . }}
