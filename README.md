@@ -1,5 +1,9 @@
 # GPU Metrics Exporter
 
+> [!WARNING]  
+> This repository is deprecated. The implementation has been moved to kvisor.
+
+
 A tool to collect GPU metrics [from DCGM Exporter](https://github.com/NVIDIA/dcgm-exporter) instasnces, and forward them to cast.ai.
 
 ## How it works
