@@ -1,4 +1,4 @@
-# GPU Metrics Exporter
+# DEPRECATED: GPU Metrics Exporter
 
 > [!WARNING]  
 > This repository is deprecated. The implementation has been moved to kvisor.
