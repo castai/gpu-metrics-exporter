@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/castai/logging"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -194,10 +195,11 @@ func newTestResolver(t *testing.T, labelKeys []string, objects ...*unstructured.
 
 	dynClient := fakedynamic.NewSimpleDynamicClientWithCustomListKinds(scheme, testGVRs, runtimeObjects...)
 
+	log := logging.New(logging.NewTextHandler(logging.TextHandlerConfig{}))
 	r, err := NewResolver(dynClient, Config{
 		LabelKeys: labelKeys,
 		CacheSize: 128,
-	})
+	}, log)
 	require.NoError(t, err)
 	return r
 }

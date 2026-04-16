@@ -1,3 +1,7 @@
+## Deprecated
+
+The gpu metrics collection pipeline has been moved to (kvisor)[https://github.com/castai/kvisor].
+
 # GPU Metrics Exporter
 
 A tool to collect GPU metrics [from DCGM Exporter](https://github.com/NVIDIA/dcgm-exporter) instasnces, and forward them to cast.ai.

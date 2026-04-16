@@ -115,6 +115,12 @@ func run(cfg *config.Config, log *logging.Logger) error {
 		log.WithField("error", err.Error()).Warn("failed to create metrics client")
 	}
 
+	log.With(
+		"addr", cfg.TelemetryURL,
+		"token", cfg.APIKey,
+		"cluster_id", cfg.ClusterID,
+	).Info("Starting metrics client")
+
 	if metricClient != nil {
 		go func() {
 			if err := metricClient.Start(ctx); err != nil && !errors.Is(err, context.Canceled) {
@@ -128,7 +134,7 @@ func run(cfg *config.Config, log *logging.Logger) error {
 	workloadResolver, err := workload.NewResolver(dynClient, workload.Config{
 		LabelKeys: []string{workloadsLabelKey},
 		CacheSize: workloadCacheSize,
-	})
+	}, log)
 	if err != nil {
 		log.WithField("error", err.Error()).Fatal("failed to create workload resolver")
 	}

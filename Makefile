@@ -9,8 +9,7 @@ fix-lint: check-lint-dependencies
 .PHONY: build
 build:
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-s -w" -o bin/gpu-metrics-exporter-amd64 ./cmd/main.go
-	GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags "-s -w" -o bin/gpu-metrics-exporter-arm64 ./cmd/main.go
-	docker buildx build --push --platform=linux/amd64,linux/arm64 -t  $(TAG) .
+	docker buildx build --push --platform=linux/amd64 -t  $(TAG) .
 
 .PHONY: generate
 generate:
